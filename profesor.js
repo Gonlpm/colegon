@@ -88,6 +88,9 @@ document
     document.getElementById("cancelar-edicion").style.display =
       "none";
 
+    document.getElementById("mensaje-alumno").textContent =
+      "";
+
     formularioAlumno.style.display =
       "block";
   });
@@ -108,6 +111,10 @@ document
   .getElementById("guardar-alumno")
   .addEventListener("click", guardarAlumno);
 
+
+/* =========================
+   GUARDAR / CREAR ALUMNO
+========================= */
 
 async function guardarAlumno() {
 
@@ -146,12 +153,13 @@ async function guardarAlumno() {
   }
 
 
-  let respuesta;
-
+  /*
+   * EDITAR ALUMNO EXISTENTE
+   */
 
   if (alumnoEditando) {
 
-    respuesta = await fetch(
+    const respuesta = await fetch(
       `${SUPABASE_URL}/rest/v1/alumnos?id=eq.${alumnoEditando}`,
       {
         method: "PATCH",
@@ -165,42 +173,133 @@ async function guardarAlumno() {
       }
     );
 
-  } else {
 
-    respuesta = await fetch(
-      `${SUPABASE_URL}/rest/v1/alumnos`,
-      {
-        method: "POST",
+    if (!respuesta.ok) {
 
-        headers: {
-          ...headers,
-          "Prefer": "return=minimal"
-        },
+      document.getElementById("mensaje-alumno").textContent =
+        "No se ha podido actualizar el alumno.";
 
-        body: JSON.stringify(datos)
-      }
-    );
-  }
+      return;
+    }
 
-
-  if (!respuesta.ok) {
 
     document.getElementById("mensaje-alumno").textContent =
-      "No se ha podido guardar el alumno.";
+      "Alumno actualizado correctamente.";
+
+    limpiarFormularioAlumno();
+
+    formularioAlumno.style.display =
+      "none";
+
+    cargarAlumnos();
 
     return;
   }
 
 
+  /*
+   * CREAR ALUMNO NUEVO
+   *
+   * La Edge Function crea:
+   * - cuenta de Supabase Auth
+   * - perfil
+   * - alumno
+   * - usuario_id
+   */
+
+  if (!datos.correo) {
+
+    document.getElementById("mensaje-alumno").textContent =
+      "Introduce el correo electrónico del alumno.";
+
+    return;
+  }
+
+
+  const boton =
+    document.getElementById("guardar-alumno");
+
+  boton.disabled = true;
+
+  boton.textContent =
+    "Creando alumno...";
+
+
   document.getElementById("mensaje-alumno").textContent =
-    "Alumno guardado correctamente.";
+    "Creando cuenta del alumno...";
 
-  limpiarFormularioAlumno();
 
-  formularioAlumno.style.display =
-    "none";
+  try {
 
-  cargarAlumnos();
+    const respuesta = await fetch(
+      `${SUPABASE_URL}/functions/v1/crear-alumno`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          "apikey": SUPABASE_KEY
+        },
+
+        body: JSON.stringify(datos)
+      }
+    );
+
+
+    const resultado =
+      await respuesta.json();
+
+
+    if (!respuesta.ok) {
+
+      document.getElementById("mensaje-alumno").textContent =
+        resultado.error ||
+        "No se ha podido crear el alumno.";
+
+      return;
+    }
+
+
+    document.getElementById("mensaje-alumno").textContent =
+      "Alumno creado correctamente.";
+
+
+    /*
+     * Mostramos las credenciales temporales
+     * una sola vez al profesor.
+     */
+
+    alert(
+      "Alumno creado correctamente.\n\n" +
+      "Correo: " + resultado.correo + "\n" +
+      "Contraseña temporal: " +
+      resultado.password_temporal +
+      "\n\n" +
+      "Guarda estos datos y entrégaselos al alumno."
+    );
+
+
+    limpiarFormularioAlumno();
+
+    formularioAlumno.style.display =
+      "none";
+
+    cargarAlumnos();
+
+
+  } catch (error) {
+
+    document.getElementById("mensaje-alumno").textContent =
+      "No se ha podido conectar con Cole Gon.";
+
+  } finally {
+
+    boton.disabled = false;
+
+    boton.textContent =
+      "Guardar alumno";
+  }
 }
 
 
@@ -214,9 +313,16 @@ function limpiarFormularioAlumno() {
   document.getElementById("correo").value = "";
   document.getElementById("optativa").value = "";
 
+  document.getElementById("mensaje-alumno").textContent =
+    "";
+
   alumnoEditando = null;
 }
 
+
+/* =========================
+   CARGAR ALUMNOS
+========================= */
 
 async function cargarAlumnos() {
 
@@ -343,6 +449,10 @@ function actualizarSelectorAlumnos(alumnos) {
 }
 
 
+/* =========================
+   EDITAR ALUMNO
+========================= */
+
 async function editarAlumno(id) {
 
   const respuesta = await fetch(
@@ -409,6 +519,10 @@ async function editarAlumno(id) {
   });
 }
 
+
+/* =========================
+   ELIMINAR ALUMNO
+========================= */
 
 async function eliminarAlumno(id) {
 
@@ -1163,7 +1277,7 @@ async function eliminarAviso(id) {
   if (!respuesta.ok) {
 
     alert(
-      "No se ha podido eliminar el aviso."
+      "No se ha podido eliminar este aviso."
     );
 
     return;
