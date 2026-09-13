@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Portal Profesor - Cole Gon</title>
-
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -21,28 +20,60 @@
 
     <h2>Panel del profesor</h2>
 
-    <p>Bienvenido al portal del profesorado.</p>
+    <section>
+      <h2>Alumnos</h2>
+
+      <button id="mostrar-formulario-alumno">
+        ➕ Añadir alumno
+      </button>
+
+      <div id="formulario-alumno" style="display: none;">
+
+        <h3>Nuevo alumno</h3>
+
+        <input type="text" id="nombre" placeholder="Nombre">
+        <input type="text" id="apellidos" placeholder="Apellidos">
+        <input type="text" id="numero_alumno" placeholder="Número de alumno">
+        <input type="text" id="curso" placeholder="Curso">
+        <input type="text" id="grupo" placeholder="Grupo">
+        <input type="email" id="correo" placeholder="Correo electrónico">
+        <input type="text" id="optativa" placeholder="Optativa">
+
+        <button id="guardar-alumno">
+          Guardar alumno
+        </button>
+
+        <p id="mensaje-alumno"></p>
+
+      </div>
+
+      <div id="alumnos">
+        <p>Cargando alumnos...</p>
+      </div>
+
+    </section>
 
     <hr>
 
-    <h2>Alumnos</h2>
-    <div id="alumnos">
-      <p>Cargando alumnos...</p>
-    </div>
+    <section>
+      <h2>Tareas</h2>
+
+      <div id="tareas">
+        <p>Cargando tareas...</p>
+      </div>
+
+    </section>
 
     <hr>
 
-    <h2>Tareas</h2>
-    <div id="tareas">
-      <p>Cargando tareas...</p>
-    </div>
+    <section>
+      <h2>Avisos</h2>
 
-    <hr>
+      <div id="avisos">
+        <p>Cargando avisos...</p>
+      </div>
 
-    <h2>Avisos</h2>
-    <div id="avisos">
-      <p>Cargando avisos...</p>
-    </div>
+    </section>
 
   </main>
 
