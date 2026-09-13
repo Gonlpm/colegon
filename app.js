@@ -1,4 +1,3 @@
-```javascript
 const SUPABASE_URL = "https://lclxdcsgfqwfahwlnjkj.supabase.co";
 const SUPABASE_KEY = "sb_publishable_fH8WjNl3CLJr3Id9eQnQdQ_0AnynpMc";
 
@@ -70,4 +69,3 @@ loginForm.addEventListener("submit", async (event) => {
     mensaje.textContent = "No se ha podido conectar con Cole Gon.";
   }
 });
-```
