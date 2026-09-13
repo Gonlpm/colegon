@@ -15,6 +15,42 @@ const headers = {
 
 
 /* =========================
+   COMPROBAR ROL DE ALUMNO
+========================= */
+
+async function comprobarAlumno() {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/perfiles?usuario_id=eq.${userId}&select=rol`,
+    {
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Authorization": `Bearer ${token}`
+      }
+    }
+  );
+
+  const perfiles = await respuesta.json();
+
+  if (
+    !respuesta.ok ||
+    perfiles.length === 0 ||
+    perfiles[0].rol !== "alumno"
+  ) {
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
+
+    window.location.href = "index.html";
+
+    return false;
+  }
+
+  return true;
+}
+
+
+/* =========================
    CERRAR SESIÓN
 ========================= */
 
@@ -193,4 +229,15 @@ async function cargarAvisos() {
    INICIO
 ========================= */
 
-cargarAlumno();
+async function iniciarPortalAlumno() {
+
+  const esAlumno = await comprobarAlumno();
+
+  if (!esAlumno) {
+    return;
+  }
+
+  cargarAlumno();
+}
+
+iniciarPortalAlumno();
