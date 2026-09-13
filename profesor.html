@@ -1,73 +1,161 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Portal Profesor - Cole Gon</title>
+
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
   <header>
+
     <h1>Cole Gon</h1>
-    <p>Portal del profesorado</p>
+
+    <p>
+      Portal del profesorado
+    </p>
+
   </header>
+
 
   <main>
 
-    <button id="cerrar-sesion">Cerrar sesión</button>
+    <button id="cerrar-sesion">
+      Cerrar sesión
+    </button>
 
-    <h2>Panel del profesor</h2>
+    <h2>
+      Panel del profesor
+    </h2>
+
+
+    <!-- ALUMNOS -->
 
     <section>
-      <h2>Alumnos</h2>
+
+      <h2>
+        Alumnos
+      </h2>
 
       <button id="mostrar-formulario-alumno">
         ➕ Añadir alumno
       </button>
 
-      <div id="formulario-alumno" style="display: none;">
 
-        <h3 id="titulo-formulario">Nuevo alumno</h3>
+      <div
+        id="formulario-alumno"
+        style="display: none;"
+      >
 
-        <input type="text" id="nombre" placeholder="Nombre">
-        <input type="text" id="apellidos" placeholder="Apellidos">
-        <input type="text" id="numero_alumno" placeholder="Número de alumno">
-        <input type="text" id="curso" placeholder="Curso">
-        <input type="text" id="grupo" placeholder="Grupo">
-        <input type="email" id="correo" placeholder="Correo electrónico">
-        <input type="text" id="optativa" placeholder="Optativa">
+        <h3 id="titulo-formulario">
+          Nuevo alumno
+        </h3>
 
-        <button id="guardar-alumno">Guardar alumno</button>
-        <button id="cancelar-edicion" style="display: none;">Cancelar</button>
+        <input
+          type="text"
+          id="nombre"
+          placeholder="Nombre"
+        >
+
+        <input
+          type="text"
+          id="apellidos"
+          placeholder="Apellidos"
+        >
+
+        <input
+          type="text"
+          id="numero_alumno"
+          placeholder="Número de alumno"
+        >
+
+        <input
+          type="text"
+          id="curso"
+          placeholder="Curso"
+        >
+
+        <input
+          type="text"
+          id="grupo"
+          placeholder="Grupo"
+        >
+
+        <input
+          type="email"
+          id="correo"
+          placeholder="Correo electrónico"
+        >
+
+        <input
+          type="text"
+          id="optativa"
+          placeholder="Optativa"
+        >
+
+        <button id="guardar-alumno">
+          Guardar alumno
+        </button>
+
+        <button
+          id="cancelar-edicion"
+          style="display: none;"
+        >
+          Cancelar
+        </button>
 
         <p id="mensaje-alumno"></p>
 
       </div>
 
+
       <div id="alumnos">
-        <p>Cargando alumnos...</p>
+
+        <p>
+          Cargando alumnos...
+        </p>
+
       </div>
 
     </section>
 
+
     <hr>
+
+
+    <!-- TAREAS -->
 
     <section>
 
-      <h2>Tareas</h2>
+      <h2>
+        Tareas
+      </h2>
 
       <button id="mostrar-formulario-tarea">
         ➕ Añadir tarea
       </button>
 
-      <div id="formulario-tarea" style="display: none;">
 
-        <h3 id="titulo-formulario-tarea">Nueva tarea</h3>
+      <div
+        id="formulario-tarea"
+        style="display: none;"
+      >
+
+        <h3 id="titulo-formulario-tarea">
+          Nueva tarea
+        </h3>
 
         <select id="alumno_tarea">
-          <option value="">Selecciona un alumno</option>
+
+          <option value="">
+            Selecciona un alumno
+          </option>
+
         </select>
 
         <input
@@ -93,16 +181,29 @@
         >
 
         <select id="estado_tarea">
-          <option value="Pendiente">Pendiente</option>
-          <option value="En curso">En curso</option>
-          <option value="Completada">Completada</option>
+
+          <option value="Pendiente">
+            Pendiente
+          </option>
+
+          <option value="En curso">
+            En curso
+          </option>
+
+          <option value="Completada">
+            Completada
+          </option>
+
         </select>
 
         <button id="guardar-tarea">
           Guardar tarea
         </button>
 
-        <button id="cancelar-edicion-tarea" style="display: none;">
+        <button
+          id="cancelar-edicion-tarea"
+          style="display: none;"
+        >
           Cancelar
         </button>
 
@@ -110,27 +211,120 @@
 
       </div>
 
+
       <div id="tareas">
-        <p>Cargando tareas...</p>
+
+        <p>
+          Cargando tareas...
+        </p>
+
       </div>
 
     </section>
 
+
     <hr>
+
+
+    <!-- AVISOS -->
 
     <section>
 
-      <h2>Avisos</h2>
+      <h2>
+        Avisos
+      </h2>
+
+      <button id="mostrar-formulario-aviso">
+        ➕ Añadir aviso
+      </button>
+
+
+      <div
+        id="formulario-aviso"
+        style="display: none;"
+      >
+
+        <h3 id="titulo-formulario-aviso">
+          Nuevo aviso
+        </h3>
+
+        <input
+          type="text"
+          id="titulo_aviso"
+          placeholder="Título del aviso"
+        >
+
+        <textarea
+          id="mensaje_aviso"
+          placeholder="Mensaje del aviso"
+        ></textarea>
+
+        <input
+          type="date"
+          id="fecha_aviso"
+        >
+
+        <select id="destinatario_aviso">
+
+          <option value="todos">
+            Todos
+          </option>
+
+          <option value="alumnos">
+            Alumnos
+          </option>
+
+          <option value="profesores">
+            Profesores
+          </option>
+
+        </select>
+
+
+        <select id="activo_aviso">
+
+          <option value="true">
+            Activo
+          </option>
+
+          <option value="false">
+            Inactivo
+          </option>
+
+        </select>
+
+
+        <button id="guardar-aviso">
+          Guardar aviso
+        </button>
+
+        <button
+          id="cancelar-edicion-aviso"
+          style="display: none;"
+        >
+          Cancelar
+        </button>
+
+        <p id="mensaje-aviso"></p>
+
+      </div>
+
 
       <div id="avisos">
-        <p>Cargando avisos...</p>
+
+        <p>
+          Cargando avisos...
+        </p>
+
       </div>
 
     </section>
 
   </main>
 
+
   <script src="profesor.js"></script>
 
 </body>
+
 </html>
