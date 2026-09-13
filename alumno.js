@@ -70,13 +70,13 @@ async function cargarAlumno() {
 
 
 /* =========================
-   TAREAS
+   TAREAS PENDIENTES
 ========================= */
 
 async function cargarTareas() {
 
   const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/tareas?alumno_id=eq.${userId}&select=id,texto,descripcion,asignatura,fecha_limite,estado&order=fecha_limite.asc`,
+    `${SUPABASE_URL}/rest/v1/tareas?alumno_id=eq.${userId}&estado=eq.Pendiente&select=id,texto,descripcion,asignatura,fecha_limite,estado&order=fecha_limite.asc`,
     {
       headers: headers
     }
