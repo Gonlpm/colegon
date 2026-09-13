@@ -5,39 +5,26 @@ const loginForm = document.getElementById("login-form");
 const mensaje = document.getElementById("mensaje");
 const botonOlvido = document.getElementById("olvido-contrasena");
 
-
-/* =========================
-   INICIAR SESIÓN
-========================= */
-
 loginForm.addEventListener("submit", async (event) => {
-
   event.preventDefault();
 
-  const email =
-    document.getElementById("email").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
 
-  const password =
-    document.getElementById("password").value;
-
-  mensaje.textContent =
-    "Iniciando sesión...";
+  mensaje.textContent = "Iniciando sesión...";
 
   try {
-
     const respuesta = await fetch(
       `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
       {
         method: "POST",
-
         headers: {
           "Content-Type": "application/json",
           "apikey": SUPABASE_KEY
         },
-
         body: JSON.stringify({
-          email: email,
-          password: password
+          email,
+          password
         })
       }
     );
@@ -45,32 +32,12 @@ loginForm.addEventListener("submit", async (event) => {
     const datos = await respuesta.json();
 
     if (!respuesta.ok) {
-
-      mensaje.textContent =
-        "Correo o contraseña incorrectos.";
-
+      mensaje.textContent = "Correo o contraseña incorrectos.";
       return;
     }
 
-
-    /* =========================
-       GUARDAR SESIÓN
-    ========================= */
-
-    localStorage.setItem(
-      "access_token",
-      datos.access_token
-    );
-
-    localStorage.setItem(
-      "user_id",
-      datos.user.id
-    );
-
-
-    /* =========================
-       COMPROBAR PERFIL
-    ========================= */
+    localStorage.setItem("access_token", datos.access_token);
+    localStorage.setItem("user_id", datos.user.id);
 
     const perfilRespuesta = await fetch(
       `${SUPABASE_URL}/rest/v1/perfiles?usuario_id=eq.${datos.user.id}&select=rol`,
@@ -82,15 +49,9 @@ loginForm.addEventListener("submit", async (event) => {
       }
     );
 
-    const perfiles =
-      await perfilRespuesta.json();
+    const perfiles = await perfilRespuesta.json();
 
-
-    if (
-      !perfilRespuesta.ok ||
-      perfiles.length === 0
-    ) {
-
+    if (!perfilRespuesta.ok || perfiles.length === 0) {
       localStorage.removeItem("access_token");
       localStorage.removeItem("user_id");
 
@@ -100,32 +61,17 @@ loginForm.addEventListener("submit", async (event) => {
       return;
     }
 
-
-    /* =========================
-       REDIRECCIÓN SEGÚN ROL
-    ========================= */
-
-    const rol =
-      perfiles[0].rol;
-
+    const rol = perfiles[0].rol;
 
     if (rol === "profesor") {
-
-      window.location.href =
-        "profesor.html";
-
+      window.location.href = "profesor.html";
       return;
     }
-
 
     if (rol === "alumno") {
-
-      window.location.href =
-        "alumno.html";
-
+      window.location.href = "alumno.html";
       return;
     }
-
 
     localStorage.removeItem("access_token");
     localStorage.removeItem("user_id");
@@ -137,21 +83,14 @@ loginForm.addEventListener("submit", async (event) => {
 
     mensaje.textContent =
       "No se ha podido conectar con Cole Gon.";
-
   }
-
 });
 
-
-/* =========================
-   OLVIDÉ MI CONTRASEÑA
-========================= */
 
 botonOlvido.addEventListener("click", async () => {
 
   const email =
     document.getElementById("email").value.trim();
-
 
   if (!email) {
 
@@ -161,10 +100,8 @@ botonOlvido.addEventListener("click", async () => {
     return;
   }
 
-
   mensaje.textContent =
     "Enviando correo de recuperación...";
-
 
   try {
 
@@ -179,11 +116,12 @@ botonOlvido.addEventListener("click", async () => {
         },
 
         body: JSON.stringify({
-          email: email
+          email,
+          redirect_to:
+            "https://gonlpm.github.io/colegon/recuperar.html"
         })
       }
     );
-
 
     if (!respuesta.ok) {
 
@@ -193,7 +131,6 @@ botonOlvido.addEventListener("click", async () => {
       return;
     }
 
-
     mensaje.textContent =
       "Si el correo está registrado, recibirás un enlace para cambiar la contraseña.";
 
@@ -201,7 +138,5 @@ botonOlvido.addEventListener("click", async () => {
 
     mensaje.textContent =
       "No se ha podido conectar con Cole Gon.";
-
   }
-
 });
