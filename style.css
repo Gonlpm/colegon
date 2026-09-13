@@ -185,23 +185,16 @@ hr {
 
 
 /* =========================
-   TAREAS Y AVISOS
+   TAREAS
 ========================= */
 
-#tareas > div,
-#avisos > div {
+#tareas > div {
   padding: 16px 0;
 }
 
-#tareas h3,
-#avisos h3 {
+#tareas h3 {
   color: #14213d;
 }
-
-
-/* =========================
-   TARJETAS DE TAREAS
-========================= */
 
 .tarea-item {
   background: #f8fafc;
@@ -229,6 +222,32 @@ hr {
   border-radius: 6px;
   font-weight: bold;
   font-size: 14px;
+}
+
+
+/* =========================
+   AVISOS
+========================= */
+
+#avisos > div {
+  background: #f8fafc;
+  border: 1px solid #e1e5ea;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+#avisos > div h3 {
+  margin-top: 0;
+  color: #14213d;
+}
+
+#avisos > div p {
+  margin: 8px 0;
+}
+
+#avisos > div hr {
+  display: none;
 }
 
 
