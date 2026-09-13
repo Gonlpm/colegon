@@ -141,7 +141,7 @@ async function cargarTareas() {
 async function cargarAvisos() {
 
   const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/avisos?activo=eq.true&select=titulo,mensaje,fecha,destinatario&order=fecha.desc`,
+    `${SUPABASE_URL}/rest/v1/avisos?activo=eq.true&destinatario=in.(todos,alumnos)&select=titulo,mensaje,fecha,destinatario&order=fecha.desc`,
     {
       headers: headers
     }
