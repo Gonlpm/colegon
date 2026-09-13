@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Cole Gon</title>
+
   <link rel="stylesheet" href="style.css">
 </head>
 
@@ -11,34 +14,50 @@
 
   <main class="login-container">
 
-    <h1>Cole Gon</h1>
-    <p>Portal del alumnado y profesorado</p>
+    <section>
 
-    <form id="login-form">
+      <h1>Cole Gon</h1>
 
-      <input
-        type="email"
-        id="email"
-        placeholder="Correo electrónico"
-        required
-      >
+      <p>
+        Portal del alumnado y profesorado
+      </p>
 
-      <input
-        type="password"
-        id="password"
-        placeholder="Contraseña"
-        required
-      >
+      <hr>
 
-      <button type="submit">Iniciar sesión</button>
+      <h2>Iniciar sesión</h2>
 
-      <p id="mensaje"></p>
+      <form id="login-form">
 
-    </form>
+        <input
+          type="email"
+          id="email"
+          placeholder="Correo electrónico"
+          autocomplete="email"
+          required
+        >
+
+        <input
+          type="password"
+          id="password"
+          placeholder="Contraseña"
+          autocomplete="current-password"
+          required
+        >
+
+        <button type="submit">
+          Iniciar sesión
+        </button>
+
+        <p id="mensaje"></p>
+
+      </form>
+
+    </section>
 
   </main>
 
   <script src="app.js"></script>
 
 </body>
+
 </html>
