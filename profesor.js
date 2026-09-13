@@ -16,6 +16,7 @@ const headers = {
 
 let alumnoEditando = null;
 let tareaEditando = null;
+let avisoEditando = null;
 
 
 /* =========================
@@ -98,10 +99,7 @@ document.getElementById("guardar-alumno").addEventListener("click", async () => 
   }
 
   if (!respuesta.ok) {
-
-    mensaje.textContent =
-      "No se ha podido guardar el alumno.";
-
+    mensaje.textContent = "No se ha podido guardar el alumno.";
     return;
   }
 
@@ -199,9 +197,7 @@ async function eliminarAlumno(id) {
   );
 
   if (!respuesta.ok) {
-
     alert("No se ha podido eliminar el alumno.");
-
     return;
   }
 
@@ -240,9 +236,7 @@ async function cargarAlumnos() {
     const elemento = document.createElement("div");
 
     elemento.innerHTML = `
-      <h3>
-        ${alumno.nombre} ${alumno.apellidos}
-      </h3>
+      <h3>${alumno.nombre} ${alumno.apellidos}</h3>
 
       <p>
         <strong>Número:</strong>
@@ -280,19 +274,15 @@ async function cargarAlumnos() {
       <hr>
     `;
 
-    elemento
-      .querySelector(".editar-alumno")
-      .addEventListener(
-        "click",
-        () => editarAlumno(alumno)
-      );
+    elemento.querySelector(".editar-alumno").addEventListener(
+      "click",
+      () => editarAlumno(alumno)
+    );
 
-    elemento
-      .querySelector(".eliminar-alumno")
-      .addEventListener(
-        "click",
-        () => eliminarAlumno(alumno.id)
-      );
+    elemento.querySelector(".eliminar-alumno").addEventListener(
+      "click",
+      () => eliminarAlumno(alumno.id)
+    );
 
     contenedor.appendChild(elemento);
   });
@@ -309,20 +299,13 @@ function cargarAlumnosEnSelector(alumnos) {
 
   alumnos.forEach(alumno => {
 
-    /*
-      Las tareas utilizan usuario_id,
-      no el id interno de alumnos.
-    */
-
     if (!alumno.usuario_id) {
       return;
     }
 
-    const opcion =
-      document.createElement("option");
+    const opcion = document.createElement("option");
 
-    opcion.value =
-      alumno.usuario_id;
+    opcion.value = alumno.usuario_id;
 
     opcion.textContent =
       `${alumno.nombre} ${alumno.apellidos} (${alumno.numero_alumno})`;
@@ -336,135 +319,124 @@ function cargarAlumnosEnSelector(alumnos) {
    TAREAS
 ========================= */
 
-document
-  .getElementById("mostrar-formulario-tarea")
-  .addEventListener("click", () => {
+document.getElementById("mostrar-formulario-tarea").addEventListener("click", () => {
 
-    limpiarFormularioTarea();
+  limpiarFormularioTarea();
 
-    document.getElementById("formulario-tarea").style.display =
-      "block";
-  });
+  document.getElementById("formulario-tarea").style.display =
+    "block";
+});
 
 
-document
-  .getElementById("guardar-tarea")
-  .addEventListener("click", async () => {
+document.getElementById("guardar-tarea").addEventListener("click", async () => {
 
-    const mensaje =
-      document.getElementById("mensaje-tarea");
+  const mensaje =
+    document.getElementById("mensaje-tarea");
 
-    const alumnoId =
-      document.getElementById("alumno_tarea").value;
+  const alumnoId =
+    document.getElementById("alumno_tarea").value;
 
-    const texto =
-      document.getElementById("texto_tarea").value.trim();
+  const texto =
+    document.getElementById("texto_tarea").value.trim();
 
-    const descripcion =
-      document.getElementById("descripcion_tarea").value.trim();
+  const descripcion =
+    document.getElementById("descripcion_tarea").value.trim();
 
-    const asignatura =
-      document.getElementById("asignatura_tarea").value.trim();
+  const asignatura =
+    document.getElementById("asignatura_tarea").value.trim();
 
-    const fechaLimite =
-      document.getElementById("fecha_limite_tarea").value;
+  const fechaLimite =
+    document.getElementById("fecha_limite_tarea").value;
 
-    const estado =
-      document.getElementById("estado_tarea").value;
+  const estado =
+    document.getElementById("estado_tarea").value;
 
-    if (!alumnoId || !texto) {
-
-      mensaje.textContent =
-        "Selecciona un alumno y escribe el título de la tarea.";
-
-      return;
-    }
-
-    const tarea = {
-      texto: texto,
-      descripcion: descripcion,
-      asignatura: asignatura,
-      fecha_limite: fechaLimite || null,
-      estado: estado,
-      alumno_id: alumnoId
-    };
+  if (!alumnoId || !texto) {
 
     mensaje.textContent =
-      "Guardando tarea...";
+      "Selecciona un alumno y escribe el título de la tarea.";
 
-    let respuesta;
+    return;
+  }
 
-    if (tareaEditando) {
+  const tarea = {
+    texto: texto,
+    descripcion: descripcion,
+    asignatura: asignatura,
+    fecha_limite: fechaLimite || null,
+    estado: estado,
+    alumno_id: alumnoId
+  };
 
-      respuesta = await fetch(
-        `${SUPABASE_URL}/rest/v1/tareas?id=eq.${tareaEditando}`,
-        {
-          method: "PATCH",
-          headers: {
-            ...headers,
-            "Prefer": "return=representation"
-          },
-          body: JSON.stringify(tarea)
-        }
-      );
+  mensaje.textContent =
+    "Guardando tarea...";
 
-    } else {
+  let respuesta;
 
-      respuesta = await fetch(
-        `${SUPABASE_URL}/rest/v1/tareas`,
-        {
-          method: "POST",
-          headers: {
-            ...headers,
-            "Prefer": "return=representation"
-          },
-          body: JSON.stringify(tarea)
-        }
-      );
-    }
+  if (tareaEditando) {
 
-    if (!respuesta.ok) {
+    respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/tareas?id=eq.${tareaEditando}`,
+      {
+        method: "PATCH",
+        headers: {
+          ...headers,
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(tarea)
+      }
+    );
 
-      mensaje.textContent =
-        "No se ha podido guardar la tarea.";
+  } else {
 
-      return;
-    }
+    respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/tareas`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(tarea)
+      }
+    );
+  }
+
+  if (!respuesta.ok) {
 
     mensaje.textContent =
-      tareaEditando
-        ? "Tarea actualizada correctamente."
-        : "Tarea creada correctamente.";
+      "No se ha podido guardar la tarea.";
 
-    limpiarFormularioTarea();
+    return;
+  }
 
-    cargarTareas();
-  });
+  mensaje.textContent =
+    tareaEditando
+      ? "Tarea actualizada correctamente."
+      : "Tarea creada correctamente.";
+
+  limpiarFormularioTarea();
+  cargarTareas();
+});
 
 
-document
-  .getElementById("cancelar-edicion-tarea")
-  .addEventListener("click", () => {
-
-    limpiarFormularioTarea();
-  });
+document.getElementById("cancelar-edicion-tarea").addEventListener("click", () => {
+  limpiarFormularioTarea();
+});
 
 
 function limpiarFormularioTarea() {
 
   tareaEditando = null;
 
-  document
-    .getElementById("titulo-formulario-tarea")
-    .textContent = "Nueva tarea";
+  document.getElementById("titulo-formulario-tarea").textContent =
+    "Nueva tarea";
 
-  document
-    .getElementById("guardar-tarea")
-    .textContent = "Guardar tarea";
+  document.getElementById("guardar-tarea").textContent =
+    "Guardar tarea";
 
-  document
-    .getElementById("cancelar-edicion-tarea")
-    .style.display = "none";
+  document.getElementById("cancelar-edicion-tarea").style.display =
+    "none";
 
   document.getElementById("alumno_tarea").value = "";
   document.getElementById("texto_tarea").value = "";
@@ -483,21 +455,17 @@ function editarTarea(tarea) {
 
   tareaEditando = tarea.id;
 
-  document
-    .getElementById("titulo-formulario-tarea")
-    .textContent = "Editar tarea";
+  document.getElementById("titulo-formulario-tarea").textContent =
+    "Editar tarea";
 
-  document
-    .getElementById("guardar-tarea")
-    .textContent = "Guardar cambios";
+  document.getElementById("guardar-tarea").textContent =
+    "Guardar cambios";
 
-  document
-    .getElementById("cancelar-edicion-tarea")
-    .style.display = "inline-block";
+  document.getElementById("cancelar-edicion-tarea").style.display =
+    "inline-block";
 
-  document
-    .getElementById("formulario-tarea")
-    .style.display = "block";
+  document.getElementById("formulario-tarea").style.display =
+    "block";
 
   document.getElementById("alumno_tarea").value =
     tarea.alumno_id || "";
@@ -576,19 +544,13 @@ async function cargarTareas() {
     const alumno =
       tarea.alumnos;
 
-    let nombreAlumno = "Alumno no identificado";
-
-    if (alumno) {
-
-      nombreAlumno =
-        `${alumno.nombre} ${alumno.apellidos}`;
-
-    }
+    const nombreAlumno =
+      alumno
+        ? `${alumno.nombre} ${alumno.apellidos}`
+        : "Alumno no identificado";
 
     elemento.innerHTML = `
-      <h3>
-        ${tarea.texto}
-      </h3>
+      <h3>${tarea.texto}</h3>
 
       <p>
         <strong>Alumno:</strong>
@@ -634,19 +596,15 @@ async function cargarTareas() {
       <hr>
     `;
 
-    elemento
-      .querySelector(".editar-tarea")
-      .addEventListener(
-        "click",
-        () => editarTarea(tarea)
-      );
+    elemento.querySelector(".editar-tarea").addEventListener(
+      "click",
+      () => editarTarea(tarea)
+    );
 
-    elemento
-      .querySelector(".eliminar-tarea")
-      .addEventListener(
-        "click",
-        () => eliminarTarea(tarea.id)
-      );
+    elemento.querySelector(".eliminar-tarea").addEventListener(
+      "click",
+      () => eliminarTarea(tarea.id)
+    );
 
     contenedor.appendChild(elemento);
   });
@@ -657,10 +615,211 @@ async function cargarTareas() {
    AVISOS
 ========================= */
 
+document.getElementById("mostrar-formulario-aviso").addEventListener("click", () => {
+
+  limpiarFormularioAviso();
+
+  document.getElementById("formulario-aviso").style.display =
+    "block";
+});
+
+
+document.getElementById("guardar-aviso").addEventListener("click", async () => {
+
+  const mensaje =
+    document.getElementById("mensaje-aviso");
+
+  const aviso = {
+    titulo: document.getElementById("titulo_aviso").value.trim(),
+    mensaje: document.getElementById("mensaje_aviso").value.trim(),
+    fecha: document.getElementById("fecha_aviso").value,
+    destinatario: document.getElementById("destinatario_aviso").value,
+    activo: document.getElementById("activo_aviso").value === "true"
+  };
+
+  if (!aviso.titulo || !aviso.mensaje) {
+
+    mensaje.textContent =
+      "Completa el título y el mensaje.";
+
+    return;
+  }
+
+  mensaje.textContent =
+    "Guardando aviso...";
+
+  let respuesta;
+
+  if (avisoEditando) {
+
+    respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/avisos?id=eq.${avisoEditando}`,
+      {
+        method: "PATCH",
+        headers: {
+          ...headers,
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(aviso)
+      }
+    );
+
+  } else {
+
+    respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/avisos`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(aviso)
+      }
+    );
+  }
+
+  if (!respuesta.ok) {
+
+    mensaje.textContent =
+      "No se ha podido guardar el aviso.";
+
+    return;
+  }
+
+  mensaje.textContent =
+    avisoEditando
+      ? "Aviso actualizado correctamente."
+      : "Aviso creado correctamente.";
+
+  limpiarFormularioAviso();
+  cargarAvisos();
+});
+
+
+document.getElementById("cancelar-edicion-aviso").addEventListener("click", () => {
+  limpiarFormularioAviso();
+});
+
+
+function limpiarFormularioAviso() {
+
+  avisoEditando = null;
+
+  document.getElementById("titulo-formulario-aviso").textContent =
+    "Nuevo aviso";
+
+  document.getElementById("guardar-aviso").textContent =
+    "Guardar aviso";
+
+  document.getElementById("cancelar-edicion-aviso").style.display =
+    "none";
+
+  document.getElementById("titulo_aviso").value = "";
+  document.getElementById("mensaje_aviso").value = "";
+
+  document.getElementById("fecha_aviso").value =
+    new Date().toISOString().split("T")[0];
+
+  document.getElementById("destinatario_aviso").value =
+    "todos";
+
+  document.getElementById("activo_aviso").value =
+    "true";
+
+  document.getElementById("mensaje-aviso").textContent = "";
+}
+
+
+function editarAviso(aviso) {
+
+  avisoEditando = aviso.id;
+
+  document.getElementById("titulo-formulario-aviso").textContent =
+    "Editar aviso";
+
+  document.getElementById("guardar-aviso").textContent =
+    "Guardar cambios";
+
+  document.getElementById("cancelar-edicion-aviso").style.display =
+    "inline-block";
+
+  document.getElementById("formulario-aviso").style.display =
+    "block";
+
+  document.getElementById("titulo_aviso").value =
+    aviso.titulo || "";
+
+  document.getElementById("mensaje_aviso").value =
+    aviso.mensaje || "";
+
+  document.getElementById("fecha_aviso").value =
+    aviso.fecha || "";
+
+  document.getElementById("destinatario_aviso").value =
+    aviso.destinatario || "todos";
+
+  document.getElementById("activo_aviso").value =
+    aviso.activo ? "true" : "false";
+}
+
+
+async function eliminarAviso(id) {
+
+  if (!confirm("¿Seguro que quieres eliminar este aviso?")) {
+    return;
+  }
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/avisos?id=eq.${id}`,
+    {
+      method: "DELETE",
+      headers: headers
+    }
+  );
+
+  if (!respuesta.ok) {
+
+    alert("No se ha podido eliminar el aviso.");
+
+    return;
+  }
+
+  cargarAvisos();
+}
+
+
+async function cambiarEstadoAviso(id, activo) {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/avisos?id=eq.${id}`,
+    {
+      method: "PATCH",
+      headers: {
+        ...headers,
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify({
+        activo: !activo
+      })
+    }
+  );
+
+  if (!respuesta.ok) {
+
+    alert("No se ha podido cambiar el estado del aviso.");
+
+    return;
+  }
+
+  cargarAvisos();
+}
+
+
 async function cargarAvisos() {
 
   const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/avisos?select=titulo,mensaje,fecha,activo&order=fecha.desc`,
+    `${SUPABASE_URL}/rest/v1/avisos?select=id,titulo,mensaje,fecha,destinatario,activo&order=fecha.desc`,
     {
       headers: headers
     }
@@ -689,7 +848,9 @@ async function cargarAvisos() {
     elemento.innerHTML = `
       <h3>${aviso.titulo}</h3>
 
-      <p>${aviso.mensaje}</p>
+      <p>
+        ${aviso.mensaje}
+      </p>
 
       <p>
         <strong>Fecha:</strong>
@@ -697,12 +858,44 @@ async function cargarAvisos() {
       </p>
 
       <p>
-        <strong>Activo:</strong>
-        ${aviso.activo ? "Sí" : "No"}
+        <strong>Destinatario:</strong>
+        ${aviso.destinatario || "todos"}
       </p>
+
+      <p>
+        <strong>Estado:</strong>
+        ${aviso.activo ? "🟢 Activo" : "⚪ Inactivo"}
+      </p>
+
+      <button class="editar-aviso">
+        ✏️ Editar
+      </button>
+
+      <button class="cambiar-aviso">
+        ${aviso.activo ? "⏸️ Desactivar" : "▶️ Activar"}
+      </button>
+
+      <button class="eliminar-aviso">
+        🗑️ Eliminar
+      </button>
 
       <hr>
     `;
+
+    elemento.querySelector(".editar-aviso").addEventListener(
+      "click",
+      () => editarAviso(aviso)
+    );
+
+    elemento.querySelector(".cambiar-aviso").addEventListener(
+      "click",
+      () => cambiarEstadoAviso(aviso.id, aviso.activo)
+    );
+
+    elemento.querySelector(".eliminar-aviso").addEventListener(
+      "click",
+      () => eliminarAviso(aviso.id)
+    );
 
     contenedor.appendChild(elemento);
   });
