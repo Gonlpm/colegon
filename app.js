@@ -3,6 +3,7 @@ const SUPABASE_KEY = "sb_publishable_fH8WjNl3CLJr3Id9eQnQdQ_0AnynpMc";
 
 const loginForm = document.getElementById("login-form");
 const mensaje = document.getElementById("mensaje");
+const botonOlvido = document.getElementById("olvido-contrasena");
 
 
 /* =========================
@@ -131,6 +132,70 @@ loginForm.addEventListener("submit", async (event) => {
 
     mensaje.textContent =
       "Tu rol no está configurado correctamente.";
+
+  } catch (error) {
+
+    mensaje.textContent =
+      "No se ha podido conectar con Cole Gon.";
+
+  }
+
+});
+
+
+/* =========================
+   OLVIDÉ MI CONTRASEÑA
+========================= */
+
+botonOlvido.addEventListener("click", async () => {
+
+  const email =
+    document.getElementById("email").value.trim();
+
+
+  if (!email) {
+
+    mensaje.textContent =
+      "Escribe primero tu correo electrónico.";
+
+    return;
+  }
+
+
+  mensaje.textContent =
+    "Enviando correo de recuperación...";
+
+
+  try {
+
+    const respuesta = await fetch(
+      `${SUPABASE_URL}/auth/v1/recover`,
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY
+        },
+
+        body: JSON.stringify({
+          email: email
+        })
+      }
+    );
+
+
+    if (!respuesta.ok) {
+
+      mensaje.textContent =
+        "No se ha podido enviar el correo de recuperación.";
+
+      return;
+    }
+
+
+    mensaje.textContent =
+      "Si el correo está registrado, recibirás un enlace para cambiar la contraseña.";
 
   } catch (error) {
 
