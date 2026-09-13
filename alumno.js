@@ -138,14 +138,18 @@ async function cargarTareas() {
     const elemento =
       document.createElement("div");
 
+    elemento.className = "tarea-item";
+
     elemento.innerHTML = `
       <h3>
         ${tarea.texto}
       </h3>
 
-      <p>
-        ${tarea.descripcion || ""}
-      </p>
+      ${
+        tarea.descripcion
+          ? `<p>${tarea.descripcion}</p>`
+          : ""
+      }
 
       <p>
         <strong>📖 Asignatura:</strong>
@@ -159,10 +163,10 @@ async function cargarTareas() {
 
       <p>
         <strong>📌 Estado:</strong>
-        ${tarea.estado || "-"}
+        <span class="estado-pendiente">
+          ${tarea.estado || "Pendiente"}
+        </span>
       </p>
-
-      <hr>
     `;
 
     contenedor.appendChild(elemento);
