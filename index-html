@@ -7,12 +7,40 @@
   <title>Cole Gon</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <h1>Cole Gon</h1>
-  <p>Portal del alumnado y profesorado</p>
+  <main class="login-container">
+
+    <h1>Cole Gon</h1>
+    <p>Portal del alumnado y profesorado</p>
+
+    <form id="login-form">
+
+      <input
+        type="email"
+        id="email"
+        placeholder="Correo electrónico"
+        required
+      >
+
+      <input
+        type="password"
+        id="password"
+        placeholder="Contraseña"
+        required
+      >
+
+      <button type="submit">Iniciar sesión</button>
+
+      <p id="mensaje"></p>
+
+    </form>
+
+  </main>
 
   <script src="app.js"></script>
+
 </body>
 </html>
 ```
