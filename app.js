@@ -126,10 +126,6 @@ loginForm.addEventListener("submit", async (event) => {
     }
 
 
-    /* =========================
-       ROL NO VÁLIDO
-    ========================= */
-
     localStorage.removeItem("access_token");
     localStorage.removeItem("user_id");
 
