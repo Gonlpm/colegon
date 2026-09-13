@@ -200,6 +200,39 @@ hr {
 
 
 /* =========================
+   TARJETAS DE TAREAS
+========================= */
+
+.tarea-item {
+  background: #f8fafc;
+  border: 1px solid #e1e5ea;
+  border-radius: 12px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.tarea-item h3 {
+  margin-top: 0;
+  margin-bottom: 12px;
+  color: #14213d;
+}
+
+.tarea-item p {
+  margin: 8px 0;
+}
+
+.estado-pendiente {
+  display: inline-block;
+  background: #fff3cd;
+  color: #856404;
+  padding: 4px 9px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+
+/* =========================
    MÓVILES
 ========================= */
 
