@@ -14,18 +14,16 @@ const headers = {
   "Content-Type": "application/json"
 };
 
-let alumnoEditando = null;
-let tareaEditando = null;
-let avisoEditando = null;
-
 
 /* =========================
    CERRAR SESIÓN
 ========================= */
 
 document.getElementById("cerrar-sesion").addEventListener("click", () => {
+
   localStorage.removeItem("access_token");
   localStorage.removeItem("user_id");
+
   window.location.href = "index.html";
 });
 
@@ -34,22 +32,45 @@ document.getElementById("cerrar-sesion").addEventListener("click", () => {
    ALUMNOS
 ========================= */
 
-document.getElementById("mostrar-formulario-alumno").addEventListener("click", () => {
+let alumnoEditando = null;
 
-  limpiarFormularioAlumno();
+const formularioAlumno =
+  document.getElementById("formulario-alumno");
 
-  const formulario = document.getElementById("formulario-alumno");
+document
+  .getElementById("mostrar-formulario-alumno")
+  .addEventListener("click", () => {
 
-  formulario.style.display =
-    formulario.style.display === "none" ? "block" : "none";
-});
+    alumnoEditando = null;
+
+    document.getElementById("titulo-formulario").textContent =
+      "Nuevo alumno";
+
+    document.getElementById("cancelar-edicion").style.display =
+      "none";
+
+    formularioAlumno.style.display = "block";
+  });
 
 
-document.getElementById("guardar-alumno").addEventListener("click", async () => {
+document
+  .getElementById("cancelar-edicion")
+  .addEventListener("click", () => {
 
-  const mensaje = document.getElementById("mensaje-alumno");
+    limpiarFormularioAlumno();
 
-  const alumno = {
+    formularioAlumno.style.display = "none";
+  });
+
+
+document
+  .getElementById("guardar-alumno")
+  .addEventListener("click", guardarAlumno);
+
+
+async function guardarAlumno() {
+
+  const datos = {
     nombre: document.getElementById("nombre").value.trim(),
     apellidos: document.getElementById("apellidos").value.trim(),
     numero_alumno: document.getElementById("numero_alumno").value.trim(),
@@ -59,13 +80,13 @@ document.getElementById("guardar-alumno").addEventListener("click", async () => 
     optativa: document.getElementById("optativa").value.trim()
   };
 
-  if (!alumno.nombre || !alumno.apellidos || !alumno.numero_alumno) {
-    mensaje.textContent =
-      "Completa nombre, apellidos y número de alumno.";
+  if (!datos.nombre || !datos.apellidos) {
+
+    document.getElementById("mensaje-alumno").textContent =
+      "Introduce al menos el nombre y los apellidos.";
+
     return;
   }
-
-  mensaje.textContent = "Guardando...";
 
   let respuesta;
 
@@ -77,9 +98,9 @@ document.getElementById("guardar-alumno").addEventListener("click", async () => 
         method: "PATCH",
         headers: {
           ...headers,
-          "Prefer": "return=representation"
+          "Prefer": "return=minimal"
         },
-        body: JSON.stringify(alumno)
+        body: JSON.stringify(datos)
       }
     );
 
@@ -91,45 +112,33 @@ document.getElementById("guardar-alumno").addEventListener("click", async () => 
         method: "POST",
         headers: {
           ...headers,
-          "Prefer": "return=representation"
+          "Prefer": "return=minimal"
         },
-        body: JSON.stringify(alumno)
+        body: JSON.stringify(datos)
       }
     );
   }
 
   if (!respuesta.ok) {
-    mensaje.textContent = "No se ha podido guardar el alumno.";
+
+    document.getElementById("mensaje-alumno").textContent =
+      "No se ha podido guardar el alumno.";
+
     return;
   }
 
-  mensaje.textContent =
-    alumnoEditando
-      ? "Alumno actualizado correctamente."
-      : "Alumno creado correctamente.";
+  document.getElementById("mensaje-alumno").textContent =
+    "Alumno guardado correctamente.";
 
   limpiarFormularioAlumno();
+
+  formularioAlumno.style.display = "none";
+
   cargarAlumnos();
-});
-
-
-document.getElementById("cancelar-edicion").addEventListener("click", () => {
-  limpiarFormularioAlumno();
-});
+}
 
 
 function limpiarFormularioAlumno() {
-
-  alumnoEditando = null;
-
-  document.getElementById("titulo-formulario").textContent =
-    "Nuevo alumno";
-
-  document.getElementById("guardar-alumno").textContent =
-    "Guardar alumno";
-
-  document.getElementById("cancelar-edicion").style.display =
-    "none";
 
   document.getElementById("nombre").value = "";
   document.getElementById("apellidos").value = "";
@@ -139,25 +148,141 @@ function limpiarFormularioAlumno() {
   document.getElementById("correo").value = "";
   document.getElementById("optativa").value = "";
 
-  document.getElementById("mensaje-alumno").textContent = "";
+  alumnoEditando = null;
 }
 
 
-function editarAlumno(alumno) {
+async function cargarAlumnos() {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/alumnos?select=id,usuario_id,nombre,apellidos,numero_alumno,curso,grupo,correo,optativa&order=numero_alumno.asc`,
+    {
+      headers: headers
+    }
+  );
+
+  const alumnos = await respuesta.json();
+
+  const contenedor =
+    document.getElementById("alumnos");
+
+  if (!respuesta.ok) {
+
+    contenedor.innerHTML =
+      "<p>No se han podido cargar los alumnos.</p>";
+
+    return;
+  }
+
+  if (alumnos.length === 0) {
+
+    contenedor.innerHTML =
+      "<p>No hay alumnos registrados.</p>";
+
+    actualizarSelectorAlumnos([]);
+
+    return;
+  }
+
+  contenedor.innerHTML = "";
+
+  alumnos.forEach(alumno => {
+
+    const elemento =
+      document.createElement("div");
+
+    elemento.innerHTML = `
+      <h3>
+        ${alumno.nombre} ${alumno.apellidos}
+      </h3>
+
+      <p>
+        <strong>Nº:</strong>
+        ${alumno.numero_alumno || "-"}
+      </p>
+
+      <p>
+        <strong>Curso:</strong>
+        ${alumno.curso || "-"}
+        ${alumno.grupo || ""}
+      </p>
+
+      <p>
+        <strong>Correo:</strong>
+        ${alumno.correo || "-"}
+      </p>
+
+      <p>
+        <strong>Optativa:</strong>
+        ${alumno.optativa || "-"}
+      </p>
+
+      <button onclick="editarAlumno('${alumno.id}')">
+        ✏️ Editar
+      </button>
+
+      <button onclick="eliminarAlumno('${alumno.id}')">
+        🗑️ Eliminar
+      </button>
+
+      <hr>
+    `;
+
+    contenedor.appendChild(elemento);
+  });
+
+  actualizarSelectorAlumnos(alumnos);
+}
+
+
+function actualizarSelectorAlumnos(alumnos) {
+
+  const selector =
+    document.getElementById("alumno_tarea");
+
+  selector.innerHTML =
+    '<option value="">Selecciona un alumno</option>';
+
+  alumnos.forEach(alumno => {
+
+    if (!alumno.usuario_id) {
+      return;
+    }
+
+    const opcion =
+      document.createElement("option");
+
+    opcion.value = alumno.usuario_id;
+
+    opcion.textContent =
+      `${alumno.numero_alumno || "-"} - ${alumno.nombre} ${alumno.apellidos}`;
+
+    selector.appendChild(opcion);
+  });
+}
+
+
+async function editarAlumno(id) {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/alumnos?id=eq.${id}&select=id,nombre,apellidos,numero_alumno,curso,grupo,correo,optativa`,
+    {
+      headers: headers
+    }
+  );
+
+  const alumnos = await respuesta.json();
+
+  if (!respuesta.ok || alumnos.length === 0) {
+    return;
+  }
+
+  const alumno = alumnos[0];
 
   alumnoEditando = alumno.id;
 
   document.getElementById("titulo-formulario").textContent =
     "Editar alumno";
-
-  document.getElementById("guardar-alumno").textContent =
-    "Guardar cambios";
-
-  document.getElementById("cancelar-edicion").style.display =
-    "inline-block";
-
-  document.getElementById("formulario-alumno").style.display =
-    "block";
 
   document.getElementById("nombre").value =
     alumno.nombre || "";
@@ -179,12 +304,25 @@ function editarAlumno(alumno) {
 
   document.getElementById("optativa").value =
     alumno.optativa || "";
+
+  document.getElementById("cancelar-edicion").style.display =
+    "inline-block";
+
+  formularioAlumno.style.display = "block";
+
+  window.scrollTo({
+    top: formularioAlumno.offsetTop,
+    behavior: "smooth"
+  });
 }
 
 
 async function eliminarAlumno(id) {
 
-  if (!confirm("¿Seguro que quieres eliminar este alumno?")) {
+  const confirmar =
+    confirm("¿Seguro que quieres eliminar este alumno?");
+
+  if (!confirmar) {
     return;
   }
 
@@ -205,171 +343,65 @@ async function eliminarAlumno(id) {
 }
 
 
-async function cargarAlumnos() {
-
-  const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/alumnos?select=id,usuario_id,nombre,apellidos,numero_alumno,curso,grupo,correo,optativa`,
-    {
-      headers: headers
-    }
-  );
-
-  const alumnos = await respuesta.json();
-
-  const contenedor =
-    document.getElementById("alumnos");
-
-  if (!respuesta.ok || alumnos.length === 0) {
-
-    contenedor.innerHTML =
-      "<p>No hay alumnos registrados.</p>";
-
-    return;
-  }
-
-  cargarAlumnosEnSelector(alumnos);
-
-  contenedor.innerHTML = "";
-
-  alumnos.forEach(alumno => {
-
-    const elemento = document.createElement("div");
-
-    elemento.innerHTML = `
-      <h3>${alumno.nombre} ${alumno.apellidos}</h3>
-
-      <p>
-        <strong>Número:</strong>
-        ${alumno.numero_alumno}
-      </p>
-
-      <p>
-        <strong>Curso:</strong>
-        ${alumno.curso || "-"}
-      </p>
-
-      <p>
-        <strong>Grupo:</strong>
-        ${alumno.grupo || "-"}
-      </p>
-
-      <p>
-        <strong>Correo:</strong>
-        ${alumno.correo || "-"}
-      </p>
-
-      <p>
-        <strong>Optativa:</strong>
-        ${alumno.optativa || "-"}
-      </p>
-
-      <button class="editar-alumno">
-        ✏️ Editar
-      </button>
-
-      <button class="eliminar-alumno">
-        🗑️ Eliminar
-      </button>
-
-      <hr>
-    `;
-
-    elemento.querySelector(".editar-alumno").addEventListener(
-      "click",
-      () => editarAlumno(alumno)
-    );
-
-    elemento.querySelector(".eliminar-alumno").addEventListener(
-      "click",
-      () => eliminarAlumno(alumno.id)
-    );
-
-    contenedor.appendChild(elemento);
-  });
-}
-
-
-function cargarAlumnosEnSelector(alumnos) {
-
-  const selector =
-    document.getElementById("alumno_tarea");
-
-  selector.innerHTML =
-    '<option value="">Selecciona un alumno</option>';
-
-  alumnos.forEach(alumno => {
-
-    if (!alumno.usuario_id) {
-      return;
-    }
-
-    const opcion = document.createElement("option");
-
-    opcion.value = alumno.usuario_id;
-
-    opcion.textContent =
-      `${alumno.nombre} ${alumno.apellidos} (${alumno.numero_alumno})`;
-
-    selector.appendChild(opcion);
-  });
-}
-
-
 /* =========================
    TAREAS
 ========================= */
 
-document.getElementById("mostrar-formulario-tarea").addEventListener("click", () => {
+let tareaEditando = null;
 
-  limpiarFormularioTarea();
-
-  document.getElementById("formulario-tarea").style.display =
-    "block";
-});
+const formularioTarea =
+  document.getElementById("formulario-tarea");
 
 
-document.getElementById("guardar-tarea").addEventListener("click", async () => {
+document
+  .getElementById("mostrar-formulario-tarea")
+  .addEventListener("click", () => {
 
-  const mensaje =
-    document.getElementById("mensaje-tarea");
+    tareaEditando = null;
 
-  const alumnoId =
-    document.getElementById("alumno_tarea").value;
+    document.getElementById("titulo-formulario-tarea").textContent =
+      "Nueva tarea";
 
-  const texto =
-    document.getElementById("texto_tarea").value.trim();
+    document.getElementById("cancelar-edicion-tarea").style.display =
+      "none";
 
-  const descripcion =
-    document.getElementById("descripcion_tarea").value.trim();
+    formularioTarea.style.display = "block";
+  });
 
-  const asignatura =
-    document.getElementById("asignatura_tarea").value.trim();
 
-  const fechaLimite =
-    document.getElementById("fecha_limite_tarea").value;
+document
+  .getElementById("cancelar-edicion-tarea")
+  .addEventListener("click", () => {
 
-  const estado =
-    document.getElementById("estado_tarea").value;
+    limpiarFormularioTarea();
 
-  if (!alumnoId || !texto) {
+    formularioTarea.style.display = "none";
+  });
 
-    mensaje.textContent =
-      "Selecciona un alumno y escribe el título de la tarea.";
+
+document
+  .getElementById("guardar-tarea")
+  .addEventListener("click", guardarTarea);
+
+
+async function guardarTarea() {
+
+  const datos = {
+    alumno_id: document.getElementById("alumno_tarea").value,
+    texto: document.getElementById("texto_tarea").value.trim(),
+    descripcion: document.getElementById("descripcion_tarea").value.trim(),
+    asignatura: document.getElementById("asignatura_tarea").value.trim(),
+    fecha_limite: document.getElementById("fecha_limite_tarea").value,
+    estado: document.getElementById("estado_tarea").value
+  };
+
+  if (!datos.alumno_id || !datos.texto) {
+
+    document.getElementById("mensaje-tarea").textContent =
+      "Selecciona un alumno e introduce el título.";
 
     return;
   }
-
-  const tarea = {
-    texto: texto,
-    descripcion: descripcion,
-    asignatura: asignatura,
-    fecha_limite: fechaLimite || null,
-    estado: estado,
-    alumno_id: alumnoId
-  };
-
-  mensaje.textContent =
-    "Guardando tarea...";
 
   let respuesta;
 
@@ -381,9 +413,9 @@ document.getElementById("guardar-tarea").addEventListener("click", async () => {
         method: "PATCH",
         headers: {
           ...headers,
-          "Prefer": "return=representation"
+          "Prefer": "return=minimal"
         },
-        body: JSON.stringify(tarea)
+        body: JSON.stringify(datos)
       }
     );
 
@@ -395,77 +427,153 @@ document.getElementById("guardar-tarea").addEventListener("click", async () => {
         method: "POST",
         headers: {
           ...headers,
-          "Prefer": "return=representation"
+          "Prefer": "return=minimal"
         },
-        body: JSON.stringify(tarea)
+        body: JSON.stringify(datos)
       }
     );
   }
 
   if (!respuesta.ok) {
 
-    mensaje.textContent =
+    document.getElementById("mensaje-tarea").textContent =
       "No se ha podido guardar la tarea.";
 
     return;
   }
 
-  mensaje.textContent =
-    tareaEditando
-      ? "Tarea actualizada correctamente."
-      : "Tarea creada correctamente.";
+  document.getElementById("mensaje-tarea").textContent =
+    "Tarea guardada correctamente.";
 
   limpiarFormularioTarea();
+
+  formularioTarea.style.display = "none";
+
   cargarTareas();
-});
-
-
-document.getElementById("cancelar-edicion-tarea").addEventListener("click", () => {
-  limpiarFormularioTarea();
-});
+}
 
 
 function limpiarFormularioTarea() {
-
-  tareaEditando = null;
-
-  document.getElementById("titulo-formulario-tarea").textContent =
-    "Nueva tarea";
-
-  document.getElementById("guardar-tarea").textContent =
-    "Guardar tarea";
-
-  document.getElementById("cancelar-edicion-tarea").style.display =
-    "none";
 
   document.getElementById("alumno_tarea").value = "";
   document.getElementById("texto_tarea").value = "";
   document.getElementById("descripcion_tarea").value = "";
   document.getElementById("asignatura_tarea").value = "";
   document.getElementById("fecha_limite_tarea").value = "";
+  document.getElementById("estado_tarea").value = "Pendiente";
 
-  document.getElementById("estado_tarea").value =
-    "Pendiente";
-
-  document.getElementById("mensaje-tarea").textContent = "";
+  tareaEditando = null;
 }
 
 
-function editarTarea(tarea) {
+async function cargarTareas() {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/tareas?select=id,texto,descripcion,asignatura,fecha_limite,estado,alumno_id,alumnos(nombre,apellidos,numero_alumno)&order=fecha_limite.asc`,
+    {
+      headers: headers
+    }
+  );
+
+  const tareas = await respuesta.json();
+
+  const contenedor =
+    document.getElementById("tareas");
+
+  if (!respuesta.ok) {
+
+    contenedor.innerHTML =
+      "<p>No se han podido cargar las tareas.</p>";
+
+    return;
+  }
+
+  if (tareas.length === 0) {
+
+    contenedor.innerHTML =
+      "<p>No hay tareas.</p>";
+
+    return;
+  }
+
+  contenedor.innerHTML = "";
+
+  tareas.forEach(tarea => {
+
+    const elemento =
+      document.createElement("div");
+
+    const alumno =
+      tarea.alumnos || {};
+
+    elemento.innerHTML = `
+      <h3>
+        ${tarea.texto}
+      </h3>
+
+      <p>
+        <strong>👤 Alumno:</strong>
+        ${alumno.numero_alumno || "-"}
+        - ${alumno.nombre || ""}
+        ${alumno.apellidos || ""}
+      </p>
+
+      <p>
+        ${tarea.descripcion || ""}
+      </p>
+
+      <p>
+        <strong>📖 Asignatura:</strong>
+        ${tarea.asignatura || "-"}
+      </p>
+
+      <p>
+        <strong>📅 Fecha límite:</strong>
+        ${tarea.fecha_limite || "-"}
+      </p>
+
+      <p>
+        <strong>📌 Estado:</strong>
+        ${tarea.estado || "-"}
+      </p>
+
+      <button onclick="editarTarea('${tarea.id}')">
+        ✏️ Editar
+      </button>
+
+      <button onclick="eliminarTarea('${tarea.id}')">
+        🗑️ Eliminar
+      </button>
+
+      <hr>
+    `;
+
+    contenedor.appendChild(elemento);
+  });
+}
+
+
+async function editarTarea(id) {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/tareas?id=eq.${id}&select=id,texto,descripcion,asignatura,fecha_limite,estado,alumno_id`,
+    {
+      headers: headers
+    }
+  );
+
+  const tareas = await respuesta.json();
+
+  if (!respuesta.ok || tareas.length === 0) {
+    return;
+  }
+
+  const tarea = tareas[0];
 
   tareaEditando = tarea.id;
 
   document.getElementById("titulo-formulario-tarea").textContent =
     "Editar tarea";
-
-  document.getElementById("guardar-tarea").textContent =
-    "Guardar cambios";
-
-  document.getElementById("cancelar-edicion-tarea").style.display =
-    "inline-block";
-
-  document.getElementById("formulario-tarea").style.display =
-    "block";
 
   document.getElementById("alumno_tarea").value =
     tarea.alumno_id || "";
@@ -484,12 +592,25 @@ function editarTarea(tarea) {
 
   document.getElementById("estado_tarea").value =
     tarea.estado || "Pendiente";
+
+  document.getElementById("cancelar-edicion-tarea").style.display =
+    "inline-block";
+
+  formularioTarea.style.display = "block";
+
+  window.scrollTo({
+    top: formularioTarea.offsetTop,
+    behavior: "smooth"
+  });
 }
 
 
 async function eliminarTarea(id) {
 
-  if (!confirm("¿Seguro que quieres eliminar esta tarea?")) {
+  const confirmar =
+    confirm("¿Seguro que quieres eliminar esta tarea?");
+
+  if (!confirmar) {
     return;
   }
 
@@ -502,9 +623,7 @@ async function eliminarTarea(id) {
   );
 
   if (!respuesta.ok) {
-
     alert("No se ha podido eliminar la tarea.");
-
     return;
   }
 
@@ -512,124 +631,50 @@ async function eliminarTarea(id) {
 }
 
 
-async function cargarTareas() {
-
-  const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/tareas?select=id,texto,descripcion,asignatura,fecha_limite,estado,alumno_id,alumnos(nombre,apellidos,numero_alumno)&order=fecha_limite.asc`,
-    {
-      headers: headers
-    }
-  );
-
-  const tareas = await respuesta.json();
-
-  const contenedor =
-    document.getElementById("tareas");
-
-  if (!respuesta.ok || tareas.length === 0) {
-
-    contenedor.innerHTML =
-      "<p>No hay tareas.</p>";
-
-    return;
-  }
-
-  contenedor.innerHTML = "";
-
-  tareas.forEach(tarea => {
-
-    const elemento =
-      document.createElement("div");
-
-    const alumno =
-      tarea.alumnos;
-
-    const nombreAlumno =
-      alumno
-        ? `${alumno.nombre} ${alumno.apellidos}`
-        : "Alumno no identificado";
-
-    elemento.innerHTML = `
-      <h3>${tarea.texto}</h3>
-
-      <p>
-        <strong>Alumno:</strong>
-        ${nombreAlumno}
-      </p>
-
-      ${
-        alumno
-          ? `<p>
-               <strong>Número:</strong>
-               ${alumno.numero_alumno || "-"}
-             </p>`
-          : ""
-      }
-
-      <p>
-        ${tarea.descripcion || ""}
-      </p>
-
-      <p>
-        <strong>Asignatura:</strong>
-        ${tarea.asignatura || "-"}
-      </p>
-
-      <p>
-        <strong>Fecha límite:</strong>
-        ${tarea.fecha_limite || "-"}
-      </p>
-
-      <p>
-        <strong>Estado:</strong>
-        ${tarea.estado || "-"}
-      </p>
-
-      <button class="editar-tarea">
-        ✏️ Editar
-      </button>
-
-      <button class="eliminar-tarea">
-        🗑️ Eliminar
-      </button>
-
-      <hr>
-    `;
-
-    elemento.querySelector(".editar-tarea").addEventListener(
-      "click",
-      () => editarTarea(tarea)
-    );
-
-    elemento.querySelector(".eliminar-tarea").addEventListener(
-      "click",
-      () => eliminarTarea(tarea.id)
-    );
-
-    contenedor.appendChild(elemento);
-  });
-}
-
-
 /* =========================
    AVISOS
 ========================= */
 
-document.getElementById("mostrar-formulario-aviso").addEventListener("click", () => {
+let avisoEditando = null;
 
-  limpiarFormularioAviso();
-
-  document.getElementById("formulario-aviso").style.display =
-    "block";
-});
+const formularioAviso =
+  document.getElementById("formulario-aviso");
 
 
-document.getElementById("guardar-aviso").addEventListener("click", async () => {
+document
+  .getElementById("mostrar-formulario-aviso")
+  .addEventListener("click", () => {
 
-  const mensaje =
-    document.getElementById("mensaje-aviso");
+    avisoEditando = null;
 
-  const aviso = {
+    document.getElementById("titulo-formulario-aviso").textContent =
+      "Nuevo aviso";
+
+    document.getElementById("cancelar-edicion-aviso").style.display =
+      "none";
+
+    formularioAviso.style.display = "block";
+  });
+
+
+document
+  .getElementById("cancelar-edicion-aviso")
+  .addEventListener("click", () => {
+
+    limpiarFormularioAviso();
+
+    formularioAviso.style.display = "none";
+  });
+
+
+document
+  .getElementById("guardar-aviso")
+  .addEventListener("click", guardarAviso);
+
+
+async function guardarAviso() {
+
+  const datos = {
     titulo: document.getElementById("titulo_aviso").value.trim(),
     mensaje: document.getElementById("mensaje_aviso").value.trim(),
     fecha: document.getElementById("fecha_aviso").value,
@@ -637,16 +682,13 @@ document.getElementById("guardar-aviso").addEventListener("click", async () => {
     activo: document.getElementById("activo_aviso").value === "true"
   };
 
-  if (!aviso.titulo || !aviso.mensaje) {
+  if (!datos.titulo || !datos.mensaje) {
 
-    mensaje.textContent =
-      "Completa el título y el mensaje.";
+    document.getElementById("mensaje-aviso").textContent =
+      "Introduce el título y el mensaje.";
 
     return;
   }
-
-  mensaje.textContent =
-    "Guardando aviso...";
 
   let respuesta;
 
@@ -658,9 +700,9 @@ document.getElementById("guardar-aviso").addEventListener("click", async () => {
         method: "PATCH",
         headers: {
           ...headers,
-          "Prefer": "return=representation"
+          "Prefer": "return=minimal"
         },
-        body: JSON.stringify(aviso)
+        body: JSON.stringify(datos)
       }
     );
 
@@ -672,147 +714,41 @@ document.getElementById("guardar-aviso").addEventListener("click", async () => {
         method: "POST",
         headers: {
           ...headers,
-          "Prefer": "return=representation"
+          "Prefer": "return=minimal"
         },
-        body: JSON.stringify(aviso)
+        body: JSON.stringify(datos)
       }
     );
   }
 
   if (!respuesta.ok) {
 
-    mensaje.textContent =
+    document.getElementById("mensaje-aviso").textContent =
       "No se ha podido guardar el aviso.";
 
     return;
   }
 
-  mensaje.textContent =
-    avisoEditando
-      ? "Aviso actualizado correctamente."
-      : "Aviso creado correctamente.";
+  document.getElementById("mensaje-aviso").textContent =
+    "Aviso guardado correctamente.";
 
   limpiarFormularioAviso();
+
+  formularioAviso.style.display = "none";
+
   cargarAvisos();
-});
-
-
-document.getElementById("cancelar-edicion-aviso").addEventListener("click", () => {
-  limpiarFormularioAviso();
-});
+}
 
 
 function limpiarFormularioAviso() {
 
-  avisoEditando = null;
-
-  document.getElementById("titulo-formulario-aviso").textContent =
-    "Nuevo aviso";
-
-  document.getElementById("guardar-aviso").textContent =
-    "Guardar aviso";
-
-  document.getElementById("cancelar-edicion-aviso").style.display =
-    "none";
-
   document.getElementById("titulo_aviso").value = "";
   document.getElementById("mensaje_aviso").value = "";
+  document.getElementById("fecha_aviso").value = "";
+  document.getElementById("destinatario_aviso").value = "todos";
+  document.getElementById("activo_aviso").value = "true";
 
-  document.getElementById("fecha_aviso").value =
-    new Date().toISOString().split("T")[0];
-
-  document.getElementById("destinatario_aviso").value =
-    "todos";
-
-  document.getElementById("activo_aviso").value =
-    "true";
-
-  document.getElementById("mensaje-aviso").textContent = "";
-}
-
-
-function editarAviso(aviso) {
-
-  avisoEditando = aviso.id;
-
-  document.getElementById("titulo-formulario-aviso").textContent =
-    "Editar aviso";
-
-  document.getElementById("guardar-aviso").textContent =
-    "Guardar cambios";
-
-  document.getElementById("cancelar-edicion-aviso").style.display =
-    "inline-block";
-
-  document.getElementById("formulario-aviso").style.display =
-    "block";
-
-  document.getElementById("titulo_aviso").value =
-    aviso.titulo || "";
-
-  document.getElementById("mensaje_aviso").value =
-    aviso.mensaje || "";
-
-  document.getElementById("fecha_aviso").value =
-    aviso.fecha || "";
-
-  document.getElementById("destinatario_aviso").value =
-    aviso.destinatario || "todos";
-
-  document.getElementById("activo_aviso").value =
-    aviso.activo ? "true" : "false";
-}
-
-
-async function eliminarAviso(id) {
-
-  if (!confirm("¿Seguro que quieres eliminar este aviso?")) {
-    return;
-  }
-
-  const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/avisos?id=eq.${id}`,
-    {
-      method: "DELETE",
-      headers: headers
-    }
-  );
-
-  if (!respuesta.ok) {
-
-    alert("No se ha podido eliminar el aviso.");
-
-    return;
-  }
-
-  cargarAvisos();
-}
-
-
-async function cambiarEstadoAviso(id, activo) {
-
-  const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/avisos?id=eq.${id}`,
-    {
-      method: "PATCH",
-      headers: {
-        ...headers,
-        "Prefer": "return=representation"
-      },
-      body: JSON.stringify({
-        activo: !activo
-      })
-    }
-  );
-
-  if (!respuesta.ok) {
-
-    alert("No se ha podido cambiar el estado del aviso.");
-
-    return;
-  }
-
-  cargarAvisos();
+  avisoEditando = null;
 }
 
 
@@ -830,7 +766,15 @@ async function cargarAvisos() {
   const contenedor =
     document.getElementById("avisos");
 
-  if (!respuesta.ok || avisos.length === 0) {
+  if (!respuesta.ok) {
+
+    contenedor.innerHTML =
+      "<p>No se han podido cargar los avisos.</p>";
+
+    return;
+  }
+
+  if (avisos.length === 0) {
 
     contenedor.innerHTML =
       "<p>No hay avisos.</p>";
@@ -845,65 +789,155 @@ async function cargarAvisos() {
     const elemento =
       document.createElement("div");
 
+    const estado =
+      aviso.activo ? "Activo" : "Inactivo";
+
     elemento.innerHTML = `
-      <h3>${aviso.titulo}</h3>
+      <h3>
+        ${aviso.titulo}
+      </h3>
 
       <p>
         ${aviso.mensaje}
       </p>
 
       <p>
-        <strong>Fecha:</strong>
+        <strong>📅 Fecha:</strong>
         ${aviso.fecha || "-"}
       </p>
 
       <p>
-        <strong>Destinatario:</strong>
-        ${aviso.destinatario || "todos"}
+        <strong>👥 Destinatario:</strong>
+        ${aviso.destinatario || "-"}
       </p>
 
       <p>
-        <strong>Estado:</strong>
-        ${aviso.activo ? "🟢 Activo" : "⚪ Inactivo"}
+        <strong>📌 Estado:</strong>
+        ${estado}
       </p>
 
-      <button class="editar-aviso">
+      <button onclick="editarAviso('${aviso.id}')">
         ✏️ Editar
       </button>
 
-      <button class="cambiar-aviso">
+      <button onclick="cambiarEstadoAviso('${aviso.id}', ${!aviso.activo})">
         ${aviso.activo ? "⏸️ Desactivar" : "▶️ Activar"}
       </button>
 
-      <button class="eliminar-aviso">
+      <button onclick="eliminarAviso('${aviso.id}')">
         🗑️ Eliminar
       </button>
 
       <hr>
     `;
 
-    elemento.querySelector(".editar-aviso").addEventListener(
-      "click",
-      () => editarAviso(aviso)
-    );
-
-    elemento.querySelector(".cambiar-aviso").addEventListener(
-      "click",
-      () => cambiarEstadoAviso(aviso.id, aviso.activo)
-    );
-
-    elemento.querySelector(".eliminar-aviso").addEventListener(
-      "click",
-      () => eliminarAviso(aviso.id)
-    );
-
     contenedor.appendChild(elemento);
   });
 }
 
 
+async function editarAviso(id) {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/avisos?id=eq.${id}&select=id,titulo,mensaje,fecha,destinatario,activo`,
+    {
+      headers: headers
+    }
+  );
+
+  const avisos = await respuesta.json();
+
+  if (!respuesta.ok || avisos.length === 0) {
+    return;
+  }
+
+  const aviso = avisos[0];
+
+  avisoEditando = aviso.id;
+
+  document.getElementById("titulo-formulario-aviso").textContent =
+    "Editar aviso";
+
+  document.getElementById("titulo_aviso").value =
+    aviso.titulo || "";
+
+  document.getElementById("mensaje_aviso").value =
+    aviso.mensaje || "";
+
+  document.getElementById("fecha_aviso").value =
+    aviso.fecha || "";
+
+  document.getElementById("destinatario_aviso").value =
+    aviso.destinatario || "todos";
+
+  document.getElementById("activo_aviso").value =
+    aviso.activo ? "true" : "false";
+
+  document.getElementById("cancelar-edicion-aviso").style.display =
+    "inline-block";
+
+  formularioAviso.style.display = "block";
+
+  window.scrollTo({
+    top: formularioAviso.offsetTop,
+    behavior: "smooth"
+  });
+}
+
+
+async function cambiarEstadoAviso(id, nuevoEstado) {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/avisos?id=eq.${id}`,
+    {
+      method: "PATCH",
+      headers: {
+        ...headers,
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify({
+        activo: nuevoEstado
+      })
+    }
+  );
+
+  if (!respuesta.ok) {
+    alert("No se ha podido cambiar el estado del aviso.");
+    return;
+  }
+
+  cargarAvisos();
+}
+
+
+async function eliminarAviso(id) {
+
+  const confirmar =
+    confirm("¿Seguro que quieres eliminar este aviso?");
+
+  if (!confirmar) {
+    return;
+  }
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/avisos?id=eq.${id}`,
+    {
+      method: "DELETE",
+      headers: headers
+    }
+  );
+
+  if (!respuesta.ok) {
+    alert("No se ha podido eliminar el aviso.");
+    return;
+  }
+
+  cargarAvisos();
+}
+
+
 /* =========================
-   CARGA INICIAL
+   INICIO
 ========================= */
 
 cargarAlumnos();
