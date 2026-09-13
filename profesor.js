@@ -55,13 +55,15 @@ async function comprobarProfesor() {
    CERRAR SESIÓN
 ========================= */
 
-document.getElementById("cerrar-sesion").addEventListener("click", () => {
+document
+  .getElementById("cerrar-sesion")
+  .addEventListener("click", () => {
 
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("user_id");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
 
-  window.location.href = "index.html";
-});
+    window.location.href = "index.html";
+  });
 
 
 /* =========================
@@ -72,6 +74,7 @@ let alumnoEditando = null;
 
 const formularioAlumno =
   document.getElementById("formulario-alumno");
+
 
 document
   .getElementById("mostrar-formulario-alumno")
@@ -85,7 +88,8 @@ document
     document.getElementById("cancelar-edicion").style.display =
       "none";
 
-    formularioAlumno.style.display = "block";
+    formularioAlumno.style.display =
+      "block";
   });
 
 
@@ -95,7 +99,8 @@ document
 
     limpiarFormularioAlumno();
 
-    formularioAlumno.style.display = "none";
+    formularioAlumno.style.display =
+      "none";
   });
 
 
@@ -107,14 +112,30 @@ document
 async function guardarAlumno() {
 
   const datos = {
-    nombre: document.getElementById("nombre").value.trim(),
-    apellidos: document.getElementById("apellidos").value.trim(),
-    numero_alumno: document.getElementById("numero_alumno").value.trim(),
-    curso: document.getElementById("curso").value.trim(),
-    grupo: document.getElementById("grupo").value.trim(),
-    correo: document.getElementById("correo").value.trim(),
-    optativa: document.getElementById("optativa").value.trim()
+
+    nombre:
+      document.getElementById("nombre").value.trim(),
+
+    apellidos:
+      document.getElementById("apellidos").value.trim(),
+
+    numero_alumno:
+      document.getElementById("numero_alumno").value.trim(),
+
+    curso:
+      document.getElementById("curso").value.trim(),
+
+    grupo:
+      document.getElementById("grupo").value.trim(),
+
+    correo:
+      document.getElementById("correo").value.trim(),
+
+    optativa:
+      document.getElementById("optativa").value.trim()
+
   };
+
 
   if (!datos.nombre || !datos.apellidos) {
 
@@ -124,7 +145,9 @@ async function guardarAlumno() {
     return;
   }
 
+
   let respuesta;
+
 
   if (alumnoEditando) {
 
@@ -132,10 +155,12 @@ async function guardarAlumno() {
       `${SUPABASE_URL}/rest/v1/alumnos?id=eq.${alumnoEditando}`,
       {
         method: "PATCH",
+
         headers: {
           ...headers,
           "Prefer": "return=minimal"
         },
+
         body: JSON.stringify(datos)
       }
     );
@@ -146,14 +171,17 @@ async function guardarAlumno() {
       `${SUPABASE_URL}/rest/v1/alumnos`,
       {
         method: "POST",
+
         headers: {
           ...headers,
           "Prefer": "return=minimal"
         },
+
         body: JSON.stringify(datos)
       }
     );
   }
+
 
   if (!respuesta.ok) {
 
@@ -163,12 +191,14 @@ async function guardarAlumno() {
     return;
   }
 
+
   document.getElementById("mensaje-alumno").textContent =
     "Alumno guardado correctamente.";
 
   limpiarFormularioAlumno();
 
-  formularioAlumno.style.display = "none";
+  formularioAlumno.style.display =
+    "none";
 
   cargarAlumnos();
 }
@@ -202,6 +232,7 @@ async function cargarAlumnos() {
   const contenedor =
     document.getElementById("alumnos");
 
+
   if (!respuesta.ok) {
 
     contenedor.innerHTML =
@@ -209,6 +240,7 @@ async function cargarAlumnos() {
 
     return;
   }
+
 
   if (alumnos.length === 0) {
 
@@ -220,16 +252,21 @@ async function cargarAlumnos() {
     return;
   }
 
+
   contenedor.innerHTML = "";
+
 
   alumnos.forEach(alumno => {
 
     const elemento =
       document.createElement("div");
 
+
     elemento.innerHTML = `
+
       <h3>
-        ${alumno.nombre} ${alumno.apellidos}
+        ${alumno.nombre}
+        ${alumno.apellidos}
       </h3>
 
       <p>
@@ -262,10 +299,12 @@ async function cargarAlumnos() {
       </button>
 
       <hr>
+
     `;
 
     contenedor.appendChild(elemento);
   });
+
 
   actualizarSelectorAlumnos(alumnos);
 }
@@ -279,19 +318,25 @@ function actualizarSelectorAlumnos(alumnos) {
   selector.innerHTML =
     '<option value="">Selecciona un alumno</option>';
 
+
   alumnos.forEach(alumno => {
 
     if (!alumno.usuario_id) {
       return;
     }
 
+
     const opcion =
       document.createElement("option");
 
-    opcion.value = alumno.usuario_id;
+
+    opcion.value =
+      alumno.usuario_id;
+
 
     opcion.textContent =
       `${alumno.numero_alumno || "-"} - ${alumno.nombre} ${alumno.apellidos}`;
+
 
     selector.appendChild(opcion);
   });
@@ -307,18 +352,26 @@ async function editarAlumno(id) {
     }
   );
 
-  const alumnos = await respuesta.json();
+  const alumnos =
+    await respuesta.json();
+
 
   if (!respuesta.ok || alumnos.length === 0) {
     return;
   }
 
-  const alumno = alumnos[0];
 
-  alumnoEditando = alumno.id;
+  const alumno =
+    alumnos[0];
+
+
+  alumnoEditando =
+    alumno.id;
+
 
   document.getElementById("titulo-formulario").textContent =
     "Editar alumno";
+
 
   document.getElementById("nombre").value =
     alumno.nombre || "";
@@ -341,10 +394,14 @@ async function editarAlumno(id) {
   document.getElementById("optativa").value =
     alumno.optativa || "";
 
+
   document.getElementById("cancelar-edicion").style.display =
     "inline-block";
 
-  formularioAlumno.style.display = "block";
+
+  formularioAlumno.style.display =
+    "block";
+
 
   window.scrollTo({
     top: formularioAlumno.offsetTop,
@@ -356,11 +413,15 @@ async function editarAlumno(id) {
 async function eliminarAlumno(id) {
 
   const confirmar =
-    confirm("¿Seguro que quieres eliminar este alumno?");
+    confirm(
+      "¿Seguro que quieres eliminar este alumno?"
+    );
+
 
   if (!confirmar) {
     return;
   }
+
 
   const respuesta = await fetch(
     `${SUPABASE_URL}/rest/v1/alumnos?id=eq.${id}`,
@@ -370,10 +431,16 @@ async function eliminarAlumno(id) {
     }
   );
 
+
   if (!respuesta.ok) {
-    alert("No se ha podido eliminar el alumno.");
+
+    alert(
+      "No se ha podido eliminar el alumno."
+    );
+
     return;
   }
+
 
   cargarAlumnos();
 }
@@ -401,7 +468,8 @@ document
     document.getElementById("cancelar-edicion-tarea").style.display =
       "none";
 
-    formularioTarea.style.display = "block";
+    formularioTarea.style.display =
+      "block";
   });
 
 
@@ -411,7 +479,8 @@ document
 
     limpiarFormularioTarea();
 
-    formularioTarea.style.display = "none";
+    formularioTarea.style.display =
+      "none";
   });
 
 
@@ -423,13 +492,27 @@ document
 async function guardarTarea() {
 
   const datos = {
-    alumno_id: document.getElementById("alumno_tarea").value,
-    texto: document.getElementById("texto_tarea").value.trim(),
-    descripcion: document.getElementById("descripcion_tarea").value.trim(),
-    asignatura: document.getElementById("asignatura_tarea").value.trim(),
-    fecha_limite: document.getElementById("fecha_limite_tarea").value,
-    estado: document.getElementById("estado_tarea").value
+
+    alumno_id:
+      document.getElementById("alumno_tarea").value,
+
+    texto:
+      document.getElementById("texto_tarea").value.trim(),
+
+    descripcion:
+      document.getElementById("descripcion_tarea").value.trim(),
+
+    asignatura:
+      document.getElementById("asignatura_tarea").value.trim(),
+
+    fecha_limite:
+      document.getElementById("fecha_limite_tarea").value,
+
+    estado:
+      document.getElementById("estado_tarea").value
+
   };
+
 
   if (!datos.alumno_id || !datos.texto) {
 
@@ -439,7 +522,9 @@ async function guardarTarea() {
     return;
   }
 
+
   let respuesta;
+
 
   if (tareaEditando) {
 
@@ -447,10 +532,12 @@ async function guardarTarea() {
       `${SUPABASE_URL}/rest/v1/tareas?id=eq.${tareaEditando}`,
       {
         method: "PATCH",
+
         headers: {
           ...headers,
           "Prefer": "return=minimal"
         },
+
         body: JSON.stringify(datos)
       }
     );
@@ -461,14 +548,17 @@ async function guardarTarea() {
       `${SUPABASE_URL}/rest/v1/tareas`,
       {
         method: "POST",
+
         headers: {
           ...headers,
           "Prefer": "return=minimal"
         },
+
         body: JSON.stringify(datos)
       }
     );
   }
+
 
   if (!respuesta.ok) {
 
@@ -478,12 +568,14 @@ async function guardarTarea() {
     return;
   }
 
+
   document.getElementById("mensaje-tarea").textContent =
     "Tarea guardada correctamente.";
 
   limpiarFormularioTarea();
 
-  formularioTarea.style.display = "none";
+  formularioTarea.style.display =
+    "none";
 
   cargarTareas();
 }
@@ -511,10 +603,14 @@ async function cargarTareas() {
     }
   );
 
-  const tareas = await respuesta.json();
+
+  const tareas =
+    await respuesta.json();
+
 
   const contenedor =
     document.getElementById("tareas");
+
 
   if (!respuesta.ok) {
 
@@ -524,6 +620,7 @@ async function cargarTareas() {
     return;
   }
 
+
   if (tareas.length === 0) {
 
     contenedor.innerHTML =
@@ -532,17 +629,22 @@ async function cargarTareas() {
     return;
   }
 
+
   contenedor.innerHTML = "";
+
 
   tareas.forEach(tarea => {
 
     const elemento =
       document.createElement("div");
 
+
     const alumno =
       tarea.alumnos || {};
 
+
     elemento.innerHTML = `
+
       <h3>
         ${tarea.texto}
       </h3>
@@ -582,7 +684,9 @@ async function cargarTareas() {
       </button>
 
       <hr>
+
     `;
+
 
     contenedor.appendChild(elemento);
   });
@@ -598,18 +702,27 @@ async function editarTarea(id) {
     }
   );
 
-  const tareas = await respuesta.json();
+
+  const tareas =
+    await respuesta.json();
+
 
   if (!respuesta.ok || tareas.length === 0) {
     return;
   }
 
-  const tarea = tareas[0];
 
-  tareaEditando = tarea.id;
+  const tarea =
+    tareas[0];
+
+
+  tareaEditando =
+    tarea.id;
+
 
   document.getElementById("titulo-formulario-tarea").textContent =
     "Editar tarea";
+
 
   document.getElementById("alumno_tarea").value =
     tarea.alumno_id || "";
@@ -629,10 +742,14 @@ async function editarTarea(id) {
   document.getElementById("estado_tarea").value =
     tarea.estado || "Pendiente";
 
+
   document.getElementById("cancelar-edicion-tarea").style.display =
     "inline-block";
 
-  formularioTarea.style.display = "block";
+
+  formularioTarea.style.display =
+    "block";
+
 
   window.scrollTo({
     top: formularioTarea.offsetTop,
@@ -644,11 +761,15 @@ async function editarTarea(id) {
 async function eliminarTarea(id) {
 
   const confirmar =
-    confirm("¿Seguro que quieres eliminar esta tarea?");
+    confirm(
+      "¿Seguro que quieres eliminar esta tarea?"
+    );
+
 
   if (!confirmar) {
     return;
   }
+
 
   const respuesta = await fetch(
     `${SUPABASE_URL}/rest/v1/tareas?id=eq.${id}`,
@@ -658,10 +779,16 @@ async function eliminarTarea(id) {
     }
   );
 
+
   if (!respuesta.ok) {
-    alert("No se ha podido eliminar la tarea.");
+
+    alert(
+      "No se ha podido eliminar la tarea."
+    );
+
     return;
   }
+
 
   cargarTareas();
 }
@@ -689,7 +816,8 @@ document
     document.getElementById("cancelar-edicion-aviso").style.display =
       "none";
 
-    formularioAviso.style.display = "block";
+    formularioAviso.style.display =
+      "block";
   });
 
 
@@ -699,7 +827,8 @@ document
 
     limpiarFormularioAviso();
 
-    formularioAviso.style.display = "none";
+    formularioAviso.style.display =
+      "none";
   });
 
 
@@ -711,12 +840,24 @@ document
 async function guardarAviso() {
 
   const datos = {
-    titulo: document.getElementById("titulo_aviso").value.trim(),
-    mensaje: document.getElementById("mensaje_aviso").value.trim(),
-    fecha: document.getElementById("fecha_aviso").value,
-    destinatario: document.getElementById("destinatario_aviso").value,
-    activo: document.getElementById("activo_aviso").value === "true"
+
+    titulo:
+      document.getElementById("titulo_aviso").value.trim(),
+
+    mensaje:
+      document.getElementById("mensaje_aviso").value.trim(),
+
+    fecha:
+      document.getElementById("fecha_aviso").value,
+
+    destinatario:
+      document.getElementById("destinatario_aviso").value,
+
+    activo:
+      document.getElementById("activo_aviso").value === "true"
+
   };
+
 
   if (!datos.titulo || !datos.mensaje) {
 
@@ -726,7 +867,9 @@ async function guardarAviso() {
     return;
   }
 
+
   let respuesta;
+
 
   if (avisoEditando) {
 
@@ -734,10 +877,12 @@ async function guardarAviso() {
       `${SUPABASE_URL}/rest/v1/avisos?id=eq.${avisoEditando}`,
       {
         method: "PATCH",
+
         headers: {
           ...headers,
           "Prefer": "return=minimal"
         },
+
         body: JSON.stringify(datos)
       }
     );
@@ -748,14 +893,17 @@ async function guardarAviso() {
       `${SUPABASE_URL}/rest/v1/avisos`,
       {
         method: "POST",
+
         headers: {
           ...headers,
           "Prefer": "return=minimal"
         },
+
         body: JSON.stringify(datos)
       }
     );
   }
+
 
   if (!respuesta.ok) {
 
@@ -765,12 +913,14 @@ async function guardarAviso() {
     return;
   }
 
+
   document.getElementById("mensaje-aviso").textContent =
     "Aviso guardado correctamente.";
 
   limpiarFormularioAviso();
 
-  formularioAviso.style.display = "none";
+  formularioAviso.style.display =
+    "none";
 
   cargarAvisos();
 }
@@ -797,10 +947,14 @@ async function cargarAvisos() {
     }
   );
 
-  const avisos = await respuesta.json();
+
+  const avisos =
+    await respuesta.json();
+
 
   const contenedor =
     document.getElementById("avisos");
+
 
   if (!respuesta.ok) {
 
@@ -810,6 +964,7 @@ async function cargarAvisos() {
     return;
   }
 
+
   if (avisos.length === 0) {
 
     contenedor.innerHTML =
@@ -818,17 +973,24 @@ async function cargarAvisos() {
     return;
   }
 
+
   contenedor.innerHTML = "";
+
 
   avisos.forEach(aviso => {
 
     const elemento =
       document.createElement("div");
 
+
     const estado =
-      aviso.activo ? "Activo" : "Inactivo";
+      aviso.activo
+        ? "Activo"
+        : "Inactivo";
+
 
     elemento.innerHTML = `
+
       <h3>
         ${aviso.titulo}
       </h3>
@@ -856,7 +1018,9 @@ async function cargarAvisos() {
         ✏️ Editar
       </button>
 
-      <button onclick="cambiarEstadoAviso('${aviso.id}', ${!aviso.activo})">
+      <button
+        onclick="cambiarEstadoAviso('${aviso.id}', ${!aviso.activo})"
+      >
         ${aviso.activo ? "⏸️ Desactivar" : "▶️ Activar"}
       </button>
 
@@ -865,7 +1029,9 @@ async function cargarAvisos() {
       </button>
 
       <hr>
+
     `;
+
 
     contenedor.appendChild(elemento);
   });
@@ -881,18 +1047,27 @@ async function editarAviso(id) {
     }
   );
 
-  const avisos = await respuesta.json();
+
+  const avisos =
+    await respuesta.json();
+
 
   if (!respuesta.ok || avisos.length === 0) {
     return;
   }
 
-  const aviso = avisos[0];
 
-  avisoEditando = aviso.id;
+  const aviso =
+    avisos[0];
+
+
+  avisoEditando =
+    aviso.id;
+
 
   document.getElementById("titulo-formulario-aviso").textContent =
     "Editar aviso";
+
 
   document.getElementById("titulo_aviso").value =
     aviso.titulo || "";
@@ -907,12 +1082,18 @@ async function editarAviso(id) {
     aviso.destinatario || "todos";
 
   document.getElementById("activo_aviso").value =
-    aviso.activo ? "true" : "false";
+    aviso.activo
+      ? "true"
+      : "false";
+
 
   document.getElementById("cancelar-edicion-aviso").style.display =
     "inline-block";
 
-  formularioAviso.style.display = "block";
+
+  formularioAviso.style.display =
+    "block";
+
 
   window.scrollTo({
     top: formularioAviso.offsetTop,
@@ -921,26 +1102,37 @@ async function editarAviso(id) {
 }
 
 
-async function cambiarEstadoAviso(id, nuevoEstado) {
+async function cambiarEstadoAviso(
+  id,
+  nuevoEstado
+) {
 
   const respuesta = await fetch(
     `${SUPABASE_URL}/rest/v1/avisos?id=eq.${id}`,
     {
       method: "PATCH",
+
       headers: {
         ...headers,
         "Prefer": "return=minimal"
       },
+
       body: JSON.stringify({
         activo: nuevoEstado
       })
     }
   );
 
+
   if (!respuesta.ok) {
-    alert("No se ha podido cambiar el estado del aviso.");
+
+    alert(
+      "No se ha podido cambiar el estado del aviso."
+    );
+
     return;
   }
+
 
   cargarAvisos();
 }
@@ -949,11 +1141,15 @@ async function cambiarEstadoAviso(id, nuevoEstado) {
 async function eliminarAviso(id) {
 
   const confirmar =
-    confirm("¿Seguro que quieres eliminar este aviso?");
+    confirm(
+      "¿Seguro que quieres eliminar este aviso?"
+    );
+
 
   if (!confirmar) {
     return;
   }
+
 
   const respuesta = await fetch(
     `${SUPABASE_URL}/rest/v1/avisos?id=eq.${id}`,
@@ -963,10 +1159,16 @@ async function eliminarAviso(id) {
     }
   );
 
+
   if (!respuesta.ok) {
-    alert("No se ha podido eliminar el aviso.");
+
+    alert(
+      "No se ha podido eliminar el aviso."
+    );
+
     return;
   }
+
 
   cargarAvisos();
 }
@@ -978,15 +1180,19 @@ async function eliminarAviso(id) {
 
 async function iniciarPanelProfesor() {
 
-  const esProfesor = await comprobarProfesor();
+  const esProfesor =
+    await comprobarProfesor();
+
 
   if (!esProfesor) {
     return;
   }
 
+
   cargarAlumnos();
   cargarTareas();
   cargarAvisos();
 }
+
 
 iniciarPanelProfesor();
