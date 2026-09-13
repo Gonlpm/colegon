@@ -13,6 +13,12 @@ const headers = {
   "Authorization": `Bearer ${token}`
 };
 
+document.getElementById("cerrar-sesion").addEventListener("click", () => {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("user_id");
+  window.location.href = "index.html";
+});
+
 async function cargarAlumnos() {
   const respuesta = await fetch(
     `${SUPABASE_URL}/rest/v1/alumnos?select=nombre,apellidos,numero_alumno,curso,grupo,correo`,
