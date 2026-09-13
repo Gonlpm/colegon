@@ -10,7 +10,8 @@ if (!token || !userId) {
 
 const headers = {
   "apikey": SUPABASE_KEY,
-  "Authorization": `Bearer ${token}`
+  "Authorization": `Bearer ${token}`,
+  "Content-Type": "application/json"
 };
 
 document.getElementById("cerrar-sesion").addEventListener("click", () => {
@@ -19,9 +20,74 @@ document.getElementById("cerrar-sesion").addEventListener("click", () => {
   window.location.href = "index.html";
 });
 
-async function cargarAlumnos() {
+document.getElementById("mostrar-formulario-alumno").addEventListener("click", () => {
+  const formulario = document.getElementById("formulario-alumno");
+
+  if (formulario.style.display === "none") {
+    formulario.style.display = "block";
+  } else {
+    formulario.style.display = "none";
+  }
+});
+
+document.getElementById("guardar-alumno").addEventListener("click", async () => {
+
+  const mensaje = document.getElementById("mensaje-alumno");
+
+  const alumno = {
+    nombre: document.getElementById("nombre").value,
+    apellidos: document.getElementById("apellidos").value,
+    numero_alumno: document.getElementById("numero_alumno").value,
+    curso: document.getElementById("curso").value,
+    grupo: document.getElementById("grupo").value,
+    correo: document.getElementById("correo").value,
+    optativa: document.getElementById("optativa").value
+  };
+
+  if (!alumno.nombre || !alumno.apellidos || !alumno.numero_alumno) {
+    mensaje.textContent = "Completa nombre, apellidos y número de alumno.";
+    return;
+  }
+
+  mensaje.textContent = "Guardando alumno...";
+
   const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/alumnos?select=nombre,apellidos,numero_alumno,curso,grupo,correo`,
+    `${SUPABASE_URL}/rest/v1/alumnos`,
+    {
+      method: "POST",
+      headers: {
+        ...headers,
+        "Prefer": "return=representation"
+      },
+      body: JSON.stringify(alumno)
+    }
+  );
+
+  const datos = await respuesta.json();
+
+  if (!respuesta.ok) {
+    mensaje.textContent = "No se ha podido guardar el alumno.";
+    console.error(datos);
+    return;
+  }
+
+  mensaje.textContent = "Alumno guardado correctamente.";
+
+  document.getElementById("nombre").value = "";
+  document.getElementById("apellidos").value = "";
+  document.getElementById("numero_alumno").value = "";
+  document.getElementById("curso").value = "";
+  document.getElementById("grupo").value = "";
+  document.getElementById("correo").value = "";
+  document.getElementById("optativa").value = "";
+
+  cargarAlumnos();
+});
+
+async function cargarAlumnos() {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/alumnos?select=nombre,apellidos,numero_alumno,curso,grupo,correo,optativa`,
     {
       headers: headers
     }
@@ -38,6 +104,7 @@ async function cargarAlumnos() {
   contenedor.innerHTML = "";
 
   alumnos.forEach(alumno => {
+
     const elemento = document.createElement("div");
 
     elemento.innerHTML = `
@@ -46,6 +113,7 @@ async function cargarAlumnos() {
       <p><strong>Curso:</strong> ${alumno.curso || "-"}</p>
       <p><strong>Grupo:</strong> ${alumno.grupo || "-"}</p>
       <p><strong>Correo:</strong> ${alumno.correo || "-"}</p>
+      <p><strong>Optativa:</strong> ${alumno.optativa || "-"}</p>
       <hr>
     `;
 
@@ -54,6 +122,7 @@ async function cargarAlumnos() {
 }
 
 async function cargarTareas() {
+
   const respuesta = await fetch(
     `${SUPABASE_URL}/rest/v1/tareas?select=id,texto,descripcion,asignatura,fecha_limite,estado,alumno_id`,
     {
@@ -72,6 +141,7 @@ async function cargarTareas() {
   contenedor.innerHTML = "";
 
   tareas.forEach(tarea => {
+
     const elemento = document.createElement("div");
 
     elemento.innerHTML = `
@@ -88,6 +158,7 @@ async function cargarTareas() {
 }
 
 async function cargarAvisos() {
+
   const respuesta = await fetch(
     `${SUPABASE_URL}/rest/v1/avisos?select=titulo,mensaje,fecha,activo&order=fecha.desc`,
     {
@@ -106,6 +177,7 @@ async function cargarAvisos() {
   contenedor.innerHTML = "";
 
   avisos.forEach(aviso => {
+
     const elemento = document.createElement("div");
 
     elemento.innerHTML = `
