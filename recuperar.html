@@ -1,63 +1,97 @@
-<!DOCTYPE html>
-<html lang="es">
+const SUPABASE_URL = "https://lclxdcsgfqwfahwlnjkj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_fH8WjNl3CLJr3Id9eQnQdQ_0AnynpMc";
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+const formulario =
+  document.getElementById("recuperar-form");
 
-  <title>Recuperar contraseña - Cole Gon</title>
+const mensaje =
+  document.getElementById("mensaje-recuperar");
 
-  <link rel="stylesheet" href="style.css">
-</head>
 
-<body>
+formulario.addEventListener("submit", async (event) => {
 
-  <main class="login-container">
+  event.preventDefault();
 
-    <section>
+  const password =
+    document.getElementById("nueva-password").value;
 
-      <h1>Cole Gon</h1>
+  const confirmar =
+    document.getElementById("confirmar-password").value;
 
-      <p>Cambiar contraseña</p>
 
-      <hr>
+  if (password !== confirmar) {
 
-      <h2>Nueva contraseña</h2>
+    mensaje.textContent =
+      "Las contraseñas no coinciden.";
 
-      <form id="recuperar-form">
+    return;
+  }
 
-        <input
-          type="password"
-          id="nueva-password"
-          placeholder="Nueva contraseña"
-          autocomplete="new-password"
-          minlength="6"
-          required
-        >
 
-        <input
-          type="password"
-          id="confirmar-password"
-          placeholder="Repite la nueva contraseña"
-          autocomplete="new-password"
-          minlength="6"
-          required
-        >
+  if (password.length < 6) {
 
-        <button type="submit">
-          Cambiar contraseña
-        </button>
+    mensaje.textContent =
+      "La contraseña debe tener al menos 6 caracteres.";
 
-        <p id="mensaje-recuperar"></p>
+    return;
+  }
 
-      </form>
 
-    </section>
+  mensaje.textContent =
+    "Cambiando contraseña...";
 
-  </main>
 
-  <script src="recuperar.js"></script>
+  try {
 
-</body>
+    const respuesta = await fetch(
+      `${SUPABASE_URL}/auth/v1/user`,
+      {
+        method: "PUT",
 
-</html>
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY,
+          "Authorization":
+            `Bearer ${localStorage.getItem("access_token")}`
+        },
+
+        body: JSON.stringify({
+          password: password
+        })
+      }
+    );
+
+
+    if (!respuesta.ok) {
+
+      mensaje.textContent =
+        "No se ha podido cambiar la contraseña.";
+
+      return;
+    }
+
+
+    mensaje.textContent =
+      "Contraseña cambiada correctamente. Volviendo al inicio...";
+
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
+
+
+    setTimeout(() => {
+
+      window.location.href =
+        "index.html";
+
+    }, 2000);
+
+
+  } catch (error) {
+
+    mensaje.textContent =
+      "No se ha podido conectar con Cole Gon.";
+
+  }
+
+});
