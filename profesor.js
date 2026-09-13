@@ -14,6 +14,8 @@ const headers = {
   "Content-Type": "application/json"
 };
 
+let alumnoEditando = null;
+
 document.getElementById("cerrar-sesion").addEventListener("click", () => {
   localStorage.removeItem("access_token");
   localStorage.removeItem("user_id");
@@ -21,13 +23,11 @@ document.getElementById("cerrar-sesion").addEventListener("click", () => {
 });
 
 document.getElementById("mostrar-formulario-alumno").addEventListener("click", () => {
-  const formulario = document.getElementById("formulario-alumno");
+  limpiarFormulario();
 
-  if (formulario.style.display === "none") {
-    formulario.style.display = "block";
-  } else {
-    formulario.style.display = "none";
-  }
+  const formulario = document.getElementById("formulario-alumno");
+  formulario.style.display =
+    formulario.style.display === "none" ? "block" : "none";
 });
 
 document.getElementById("guardar-alumno").addEventListener("click", async () => {
@@ -35,13 +35,13 @@ document.getElementById("guardar-alumno").addEventListener("click", async () => 
   const mensaje = document.getElementById("mensaje-alumno");
 
   const alumno = {
-    nombre: document.getElementById("nombre").value,
-    apellidos: document.getElementById("apellidos").value,
-    numero_alumno: document.getElementById("numero_alumno").value,
-    curso: document.getElementById("curso").value,
-    grupo: document.getElementById("grupo").value,
-    correo: document.getElementById("correo").value,
-    optativa: document.getElementById("optativa").value
+    nombre: document.getElementById("nombre").value.trim(),
+    apellidos: document.getElementById("apellidos").value.trim(),
+    numero_alumno: document.getElementById("numero_alumno").value.trim(),
+    curso: document.getElementById("curso").value.trim(),
+    grupo: document.getElementById("grupo").value.trim(),
+    correo: document.getElementById("correo").value.trim(),
+    optativa: document.getElementById("optativa").value.trim()
   };
 
   if (!alumno.nombre || !alumno.apellidos || !alumno.numero_alumno) {
@@ -49,19 +49,38 @@ document.getElementById("guardar-alumno").addEventListener("click", async () => 
     return;
   }
 
-  mensaje.textContent = "Guardando alumno...";
+  mensaje.textContent = "Guardando...";
 
-  const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/alumnos`,
-    {
-      method: "POST",
-      headers: {
-        ...headers,
-        "Prefer": "return=representation"
-      },
-      body: JSON.stringify(alumno)
-    }
-  );
+  let respuesta;
+
+  if (alumnoEditando) {
+
+    respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/alumnos?id=eq.${alumnoEditando}`,
+      {
+        method: "PATCH",
+        headers: {
+          ...headers,
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(alumno)
+      }
+    );
+
+  } else {
+
+    respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/alumnos`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(alumno)
+      }
+    );
+  }
 
   const datos = await respuesta.json();
 
@@ -71,7 +90,25 @@ document.getElementById("guardar-alumno").addEventListener("click", async () => 
     return;
   }
 
-  mensaje.textContent = "Alumno guardado correctamente.";
+  mensaje.textContent = alumnoEditando
+    ? "Alumno actualizado correctamente."
+    : "Alumno creado correctamente.";
+
+  limpiarFormulario();
+  cargarAlumnos();
+});
+
+document.getElementById("cancelar-edicion").addEventListener("click", () => {
+  limpiarFormulario();
+});
+
+function limpiarFormulario() {
+
+  alumnoEditando = null;
+
+  document.getElementById("titulo-formulario").textContent = "Nuevo alumno";
+  document.getElementById("guardar-alumno").textContent = "Guardar alumno";
+  document.getElementById("cancelar-edicion").style.display = "none";
 
   document.getElementById("nombre").value = "";
   document.getElementById("apellidos").value = "";
@@ -80,14 +117,77 @@ document.getElementById("guardar-alumno").addEventListener("click", async () => 
   document.getElementById("grupo").value = "";
   document.getElementById("correo").value = "";
   document.getElementById("optativa").value = "";
+  document.getElementById("mensaje-alumno").textContent = "";
+}
+
+function editarAlumno(alumno) {
+
+  alumnoEditando = alumno.id;
+
+  document.getElementById("titulo-formulario").textContent =
+    "Editar alumno";
+
+  document.getElementById("guardar-alumno").textContent =
+    "Guardar cambios";
+
+  document.getElementById("cancelar-edicion").style.display =
+    "inline-block";
+
+  document.getElementById("formulario-alumno").style.display =
+    "block";
+
+  document.getElementById("nombre").value =
+    alumno.nombre || "";
+
+  document.getElementById("apellidos").value =
+    alumno.apellidos || "";
+
+  document.getElementById("numero_alumno").value =
+    alumno.numero_alumno || "";
+
+  document.getElementById("curso").value =
+    alumno.curso || "";
+
+  document.getElementById("grupo").value =
+    alumno.grupo || "";
+
+  document.getElementById("correo").value =
+    alumno.correo || "";
+
+  document.getElementById("optativa").value =
+    alumno.optativa || "";
+}
+
+async function eliminarAlumno(id) {
+
+  const confirmar = confirm(
+    "¿Seguro que quieres eliminar este alumno?"
+  );
+
+  if (!confirmar) {
+    return;
+  }
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/alumnos?id=eq.${id}`,
+    {
+      method: "DELETE",
+      headers: headers
+    }
+  );
+
+  if (!respuesta.ok) {
+    alert("No se ha podido eliminar el alumno.");
+    return;
+  }
 
   cargarAlumnos();
-});
+}
 
 async function cargarAlumnos() {
 
   const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/alumnos?select=nombre,apellidos,numero_alumno,curso,grupo,correo,optativa`,
+    `${SUPABASE_URL}/rest/v1/alumnos?select=id,nombre,apellidos,numero_alumno,curso,grupo,correo,optativa`,
     {
       headers: headers
     }
@@ -109,13 +209,33 @@ async function cargarAlumnos() {
 
     elemento.innerHTML = `
       <h3>${alumno.nombre} ${alumno.apellidos}</h3>
+
       <p><strong>Número:</strong> ${alumno.numero_alumno}</p>
       <p><strong>Curso:</strong> ${alumno.curso || "-"}</p>
       <p><strong>Grupo:</strong> ${alumno.grupo || "-"}</p>
       <p><strong>Correo:</strong> ${alumno.correo || "-"}</p>
       <p><strong>Optativa:</strong> ${alumno.optativa || "-"}</p>
+
+      <button class="editar-alumno">
+        ✏️ Editar
+      </button>
+
+      <button class="eliminar-alumno">
+        🗑️ Eliminar
+      </button>
+
       <hr>
     `;
+
+    elemento.querySelector(".editar-alumno").addEventListener(
+      "click",
+      () => editarAlumno(alumno)
+    );
+
+    elemento.querySelector(".eliminar-alumno").addEventListener(
+      "click",
+      () => eliminarAlumno(alumno.id)
+    );
 
     contenedor.appendChild(elemento);
   });
