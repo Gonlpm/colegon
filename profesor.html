@@ -39,13 +39,8 @@
         <input type="email" id="correo" placeholder="Correo electrónico">
         <input type="text" id="optativa" placeholder="Optativa">
 
-        <button id="guardar-alumno">
-          Guardar alumno
-        </button>
-
-        <button id="cancelar-edicion" style="display: none;">
-          Cancelar
-        </button>
+        <button id="guardar-alumno">Guardar alumno</button>
+        <button id="cancelar-edicion" style="display: none;">Cancelar</button>
 
         <p id="mensaje-alumno"></p>
 
@@ -60,7 +55,60 @@
     <hr>
 
     <section>
+
       <h2>Tareas</h2>
+
+      <button id="mostrar-formulario-tarea">
+        ➕ Añadir tarea
+      </button>
+
+      <div id="formulario-tarea" style="display: none;">
+
+        <h3 id="titulo-formulario-tarea">Nueva tarea</h3>
+
+        <select id="alumno_tarea">
+          <option value="">Selecciona un alumno</option>
+        </select>
+
+        <input
+          type="text"
+          id="texto_tarea"
+          placeholder="Título de la tarea"
+        >
+
+        <textarea
+          id="descripcion_tarea"
+          placeholder="Descripción de la tarea"
+        ></textarea>
+
+        <input
+          type="text"
+          id="asignatura_tarea"
+          placeholder="Asignatura"
+        >
+
+        <input
+          type="date"
+          id="fecha_limite_tarea"
+        >
+
+        <select id="estado_tarea">
+          <option value="Pendiente">Pendiente</option>
+          <option value="En curso">En curso</option>
+          <option value="Completada">Completada</option>
+        </select>
+
+        <button id="guardar-tarea">
+          Guardar tarea
+        </button>
+
+        <button id="cancelar-edicion-tarea" style="display: none;">
+          Cancelar
+        </button>
+
+        <p id="mensaje-tarea"></p>
+
+      </div>
 
       <div id="tareas">
         <p>Cargando tareas...</p>
@@ -71,6 +119,7 @@
     <hr>
 
     <section>
+
       <h2>Avisos</h2>
 
       <div id="avisos">
