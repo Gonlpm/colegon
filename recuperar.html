@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Recuperar contraseña - Cole Gon</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <main class="login-container">
+
+    <section>
+
+      <h1>Cole Gon</h1>
+
+      <p>Cambiar contraseña</p>
+
+      <hr>
+
+      <h2>Nueva contraseña</h2>
+
+      <form id="recuperar-form">
+
+        <input
+          type="password"
+          id="nueva-password"
+          placeholder="Nueva contraseña"
+          autocomplete="new-password"
+          minlength="6"
+          required
+        >
+
+        <input
+          type="password"
+          id="confirmar-password"
+          placeholder="Repite la nueva contraseña"
+          autocomplete="new-password"
+          minlength="6"
+          required
+        >
+
+        <button type="submit">
+          Cambiar contraseña
+        </button>
+
+        <p id="mensaje-recuperar"></p>
+
+      </form>
+
+    </section>
+
+  </main>
+
+  <script src="recuperar.js"></script>
+
+</body>
+
+</html>
