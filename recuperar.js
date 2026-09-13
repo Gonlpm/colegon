@@ -8,6 +8,18 @@ const mensaje =
   document.getElementById("mensaje-recuperar");
 
 
+function obtenerAccessToken() {
+
+  const hash =
+    window.location.hash.substring(1);
+
+  const parametros =
+    new URLSearchParams(hash);
+
+  return parametros.get("access_token");
+}
+
+
 formulario.addEventListener("submit", async (event) => {
 
   event.preventDefault();
@@ -37,6 +49,19 @@ formulario.addEventListener("submit", async (event) => {
   }
 
 
+  const accessToken =
+    obtenerAccessToken();
+
+
+  if (!accessToken) {
+
+    mensaje.textContent =
+      "El enlace de recuperación no es válido o ha caducado.";
+
+    return;
+  }
+
+
   mensaje.textContent =
     "Cambiando contraseña...";
 
@@ -52,11 +77,11 @@ formulario.addEventListener("submit", async (event) => {
           "Content-Type": "application/json",
           "apikey": SUPABASE_KEY,
           "Authorization":
-            `Bearer ${localStorage.getItem("access_token")}`
+            `Bearer ${accessToken}`
         },
 
         body: JSON.stringify({
-          password: password
+          password
         })
       }
     );
@@ -75,8 +100,11 @@ formulario.addEventListener("submit", async (event) => {
       "Contraseña cambiada correctamente. Volviendo al inicio...";
 
 
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user_id");
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname
+    );
 
 
     setTimeout(() => {
@@ -91,7 +119,6 @@ formulario.addEventListener("submit", async (event) => {
 
     mensaje.textContent =
       "No se ha podido conectar con Cole Gon.";
-
   }
 
 });
