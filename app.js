@@ -4,23 +4,36 @@ const SUPABASE_KEY = "sb_publishable_fH8WjNl3CLJr3Id9eQnQdQ_0AnynpMc";
 const loginForm = document.getElementById("login-form");
 const mensaje = document.getElementById("mensaje");
 
+
+/* =========================
+   INICIAR SESIÓN
+========================= */
+
 loginForm.addEventListener("submit", async (event) => {
+
   event.preventDefault();
 
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+  const email =
+    document.getElementById("email").value.trim();
 
-  mensaje.textContent = "Iniciando sesión...";
+  const password =
+    document.getElementById("password").value;
+
+  mensaje.textContent =
+    "Iniciando sesión...";
 
   try {
+
     const respuesta = await fetch(
       `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json",
           "apikey": SUPABASE_KEY
         },
+
         body: JSON.stringify({
           email: email,
           password: password
@@ -31,12 +44,32 @@ loginForm.addEventListener("submit", async (event) => {
     const datos = await respuesta.json();
 
     if (!respuesta.ok) {
-      mensaje.textContent = "Correo o contraseña incorrectos.";
+
+      mensaje.textContent =
+        "Correo o contraseña incorrectos.";
+
       return;
     }
 
-    localStorage.setItem("access_token", datos.access_token);
-    localStorage.setItem("user_id", datos.user.id);
+
+    /* =========================
+       GUARDAR SESIÓN
+    ========================= */
+
+    localStorage.setItem(
+      "access_token",
+      datos.access_token
+    );
+
+    localStorage.setItem(
+      "user_id",
+      datos.user.id
+    );
+
+
+    /* =========================
+       COMPROBAR PERFIL
+    ========================= */
 
     const perfilRespuesta = await fetch(
       `${SUPABASE_URL}/rest/v1/perfiles?usuario_id=eq.${datos.user.id}&select=rol`,
@@ -48,24 +81,66 @@ loginForm.addEventListener("submit", async (event) => {
       }
     );
 
-    const perfiles = await perfilRespuesta.json();
+    const perfiles =
+      await perfilRespuesta.json();
 
-    if (!perfilRespuesta.ok || perfiles.length === 0) {
-      mensaje.textContent = "No se ha encontrado tu perfil.";
+
+    if (
+      !perfilRespuesta.ok ||
+      perfiles.length === 0
+    ) {
+
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_id");
+
+      mensaje.textContent =
+        "No se ha encontrado tu perfil.";
+
       return;
     }
 
-    const rol = perfiles[0].rol;
+
+    /* =========================
+       REDIRECCIÓN SEGÚN ROL
+    ========================= */
+
+    const rol =
+      perfiles[0].rol;
+
 
     if (rol === "profesor") {
-      window.location.href = "profesor.html";
-    } else if (rol === "alumno") {
-      window.location.href = "alumno.html";
-    } else {
-      mensaje.textContent = "Tu rol no está configurado correctamente.";
+
+      window.location.href =
+        "profesor.html";
+
+      return;
     }
 
+
+    if (rol === "alumno") {
+
+      window.location.href =
+        "alumno.html";
+
+      return;
+    }
+
+
+    /* =========================
+       ROL NO VÁLIDO
+    ========================= */
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
+
+    mensaje.textContent =
+      "Tu rol no está configurado correctamente.";
+
   } catch (error) {
-    mensaje.textContent = "No se ha podido conectar con Cole Gon.";
+
+    mensaje.textContent =
+      "No se ha podido conectar con Cole Gon.";
+
   }
+
 });
