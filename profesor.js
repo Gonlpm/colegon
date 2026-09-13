@@ -1,136 +1,718 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Profesor - Cole Gon</title>
-  <link rel="stylesheet" href="style.css">
-</head>
+const SUPABASE_URL = "https://lclxdcsgfqwfahwlnjkj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_fH8WjNl3CLJr3Id9eQnQdQ_0AnynpMc";
 
-<body>
+const token = localStorage.getItem("access_token");
+const userId = localStorage.getItem("user_id");
 
-  <header>
-    <h1>Cole Gon</h1>
-    <p>Portal del profesorado</p>
-  </header>
+if (!token || !userId) {
+  window.location.href = "index.html";
+}
 
-  <main>
+const headers = {
+  "apikey": SUPABASE_KEY,
+  "Authorization": `Bearer ${token}`,
+  "Content-Type": "application/json"
+};
 
-    <button id="cerrar-sesion">Cerrar sesión</button>
+let alumnoEditando = null;
+let tareaEditando = null;
 
-    <h2>Panel del profesor</h2>
 
-    <section>
-      <h2>Alumnos</h2>
+/* =========================
+   CERRAR SESIÓN
+========================= */
 
-      <button id="mostrar-formulario-alumno">
-        ➕ Añadir alumno
+document.getElementById("cerrar-sesion").addEventListener("click", () => {
+  localStorage.removeItem("access_token");
+  localStorage.removeItem("user_id");
+  window.location.href = "index.html";
+});
+
+
+/* =========================
+   ALUMNOS
+========================= */
+
+document.getElementById("mostrar-formulario-alumno").addEventListener("click", () => {
+
+  limpiarFormularioAlumno();
+
+  const formulario = document.getElementById("formulario-alumno");
+
+  formulario.style.display =
+    formulario.style.display === "none" ? "block" : "none";
+});
+
+
+document.getElementById("guardar-alumno").addEventListener("click", async () => {
+
+  const mensaje = document.getElementById("mensaje-alumno");
+
+  const alumno = {
+    nombre: document.getElementById("nombre").value.trim(),
+    apellidos: document.getElementById("apellidos").value.trim(),
+    numero_alumno: document.getElementById("numero_alumno").value.trim(),
+    curso: document.getElementById("curso").value.trim(),
+    grupo: document.getElementById("grupo").value.trim(),
+    correo: document.getElementById("correo").value.trim(),
+    optativa: document.getElementById("optativa").value.trim()
+  };
+
+  if (!alumno.nombre || !alumno.apellidos || !alumno.numero_alumno) {
+    mensaje.textContent =
+      "Completa nombre, apellidos y número de alumno.";
+    return;
+  }
+
+  mensaje.textContent = "Guardando...";
+
+  let respuesta;
+
+  if (alumnoEditando) {
+
+    respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/alumnos?id=eq.${alumnoEditando}`,
+      {
+        method: "PATCH",
+        headers: {
+          ...headers,
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(alumno)
+      }
+    );
+
+  } else {
+
+    respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/alumnos`,
+      {
+        method: "POST",
+        headers: {
+          ...headers,
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(alumno)
+      }
+    );
+  }
+
+  if (!respuesta.ok) {
+
+    mensaje.textContent =
+      "No se ha podido guardar el alumno.";
+
+    return;
+  }
+
+  mensaje.textContent =
+    alumnoEditando
+      ? "Alumno actualizado correctamente."
+      : "Alumno creado correctamente.";
+
+  limpiarFormularioAlumno();
+  cargarAlumnos();
+});
+
+
+document.getElementById("cancelar-edicion").addEventListener("click", () => {
+  limpiarFormularioAlumno();
+});
+
+
+function limpiarFormularioAlumno() {
+
+  alumnoEditando = null;
+
+  document.getElementById("titulo-formulario").textContent =
+    "Nuevo alumno";
+
+  document.getElementById("guardar-alumno").textContent =
+    "Guardar alumno";
+
+  document.getElementById("cancelar-edicion").style.display =
+    "none";
+
+  document.getElementById("nombre").value = "";
+  document.getElementById("apellidos").value = "";
+  document.getElementById("numero_alumno").value = "";
+  document.getElementById("curso").value = "";
+  document.getElementById("grupo").value = "";
+  document.getElementById("correo").value = "";
+  document.getElementById("optativa").value = "";
+
+  document.getElementById("mensaje-alumno").textContent = "";
+}
+
+
+function editarAlumno(alumno) {
+
+  alumnoEditando = alumno.id;
+
+  document.getElementById("titulo-formulario").textContent =
+    "Editar alumno";
+
+  document.getElementById("guardar-alumno").textContent =
+    "Guardar cambios";
+
+  document.getElementById("cancelar-edicion").style.display =
+    "inline-block";
+
+  document.getElementById("formulario-alumno").style.display =
+    "block";
+
+  document.getElementById("nombre").value =
+    alumno.nombre || "";
+
+  document.getElementById("apellidos").value =
+    alumno.apellidos || "";
+
+  document.getElementById("numero_alumno").value =
+    alumno.numero_alumno || "";
+
+  document.getElementById("curso").value =
+    alumno.curso || "";
+
+  document.getElementById("grupo").value =
+    alumno.grupo || "";
+
+  document.getElementById("correo").value =
+    alumno.correo || "";
+
+  document.getElementById("optativa").value =
+    alumno.optativa || "";
+}
+
+
+async function eliminarAlumno(id) {
+
+  if (!confirm("¿Seguro que quieres eliminar este alumno?")) {
+    return;
+  }
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/alumnos?id=eq.${id}`,
+    {
+      method: "DELETE",
+      headers: headers
+    }
+  );
+
+  if (!respuesta.ok) {
+
+    alert("No se ha podido eliminar el alumno.");
+
+    return;
+  }
+
+  cargarAlumnos();
+}
+
+
+async function cargarAlumnos() {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/alumnos?select=id,usuario_id,nombre,apellidos,numero_alumno,curso,grupo,correo,optativa`,
+    {
+      headers: headers
+    }
+  );
+
+  const alumnos = await respuesta.json();
+
+  const contenedor =
+    document.getElementById("alumnos");
+
+  if (!respuesta.ok || alumnos.length === 0) {
+
+    contenedor.innerHTML =
+      "<p>No hay alumnos registrados.</p>";
+
+    return;
+  }
+
+  cargarAlumnosEnSelector(alumnos);
+
+  contenedor.innerHTML = "";
+
+  alumnos.forEach(alumno => {
+
+    const elemento = document.createElement("div");
+
+    elemento.innerHTML = `
+      <h3>
+        ${alumno.nombre} ${alumno.apellidos}
+      </h3>
+
+      <p>
+        <strong>Número:</strong>
+        ${alumno.numero_alumno}
+      </p>
+
+      <p>
+        <strong>Curso:</strong>
+        ${alumno.curso || "-"}
+      </p>
+
+      <p>
+        <strong>Grupo:</strong>
+        ${alumno.grupo || "-"}
+      </p>
+
+      <p>
+        <strong>Correo:</strong>
+        ${alumno.correo || "-"}
+      </p>
+
+      <p>
+        <strong>Optativa:</strong>
+        ${alumno.optativa || "-"}
+      </p>
+
+      <button class="editar-alumno">
+        ✏️ Editar
       </button>
 
-      <div id="formulario-alumno" style="display: none;">
-
-        <h3 id="titulo-formulario">Nuevo alumno</h3>
-
-        <input type="text" id="nombre" placeholder="Nombre">
-        <input type="text" id="apellidos" placeholder="Apellidos">
-        <input type="text" id="numero_alumno" placeholder="Número de alumno">
-        <input type="text" id="curso" placeholder="Curso">
-        <input type="text" id="grupo" placeholder="Grupo">
-        <input type="email" id="correo" placeholder="Correo electrónico">
-        <input type="text" id="optativa" placeholder="Optativa">
-
-        <button id="guardar-alumno">Guardar alumno</button>
-        <button id="cancelar-edicion" style="display: none;">Cancelar</button>
-
-        <p id="mensaje-alumno"></p>
-
-      </div>
-
-      <div id="alumnos">
-        <p>Cargando alumnos...</p>
-      </div>
-
-    </section>
-
-    <hr>
-
-    <section>
-
-      <h2>Tareas</h2>
-
-      <button id="mostrar-formulario-tarea">
-        ➕ Añadir tarea
+      <button class="eliminar-alumno">
+        🗑️ Eliminar
       </button>
 
-      <div id="formulario-tarea" style="display: none;">
+      <hr>
+    `;
 
-        <h3 id="titulo-formulario-tarea">Nueva tarea</h3>
+    elemento
+      .querySelector(".editar-alumno")
+      .addEventListener(
+        "click",
+        () => editarAlumno(alumno)
+      );
 
-        <select id="alumno_tarea">
-          <option value="">Selecciona un alumno</option>
-        </select>
+    elemento
+      .querySelector(".eliminar-alumno")
+      .addEventListener(
+        "click",
+        () => eliminarAlumno(alumno.id)
+      );
 
-        <input
-          type="text"
-          id="texto_tarea"
-          placeholder="Título de la tarea"
-        >
+    contenedor.appendChild(elemento);
+  });
+}
 
-        <textarea
-          id="descripcion_tarea"
-          placeholder="Descripción de la tarea"
-        ></textarea>
 
-        <input
-          type="text"
-          id="asignatura_tarea"
-          placeholder="Asignatura"
-        >
+function cargarAlumnosEnSelector(alumnos) {
 
-        <input
-          type="date"
-          id="fecha_limite_tarea"
-        >
+  const selector =
+    document.getElementById("alumno_tarea");
 
-        <select id="estado_tarea">
-          <option value="Pendiente">Pendiente</option>
-          <option value="En curso">En curso</option>
-          <option value="Completada">Completada</option>
-        </select>
+  selector.innerHTML =
+    '<option value="">Selecciona un alumno</option>';
 
-        <button id="guardar-tarea">
-          Guardar tarea
-        </button>
+  alumnos.forEach(alumno => {
 
-        <button id="cancelar-edicion-tarea" style="display: none;">
-          Cancelar
-        </button>
+    /*
+      Las tareas utilizan usuario_id,
+      no el id interno de alumnos.
+    */
 
-        <p id="mensaje-tarea"></p>
+    if (!alumno.usuario_id) {
+      return;
+    }
 
-      </div>
+    const opcion =
+      document.createElement("option");
 
-      <div id="tareas">
-        <p>Cargando tareas...</p>
-      </div>
+    opcion.value =
+      alumno.usuario_id;
 
-    </section>
+    opcion.textContent =
+      `${alumno.nombre} ${alumno.apellidos} (${alumno.numero_alumno})`;
 
-    <hr>
+    selector.appendChild(opcion);
+  });
+}
 
-    <section>
 
-      <h2>Avisos</h2>
+/* =========================
+   TAREAS
+========================= */
 
-      <div id="avisos">
-        <p>Cargando avisos...</p>
-      </div>
+document
+  .getElementById("mostrar-formulario-tarea")
+  .addEventListener("click", () => {
 
-    </section>
+    limpiarFormularioTarea();
 
-  </main>
+    document.getElementById("formulario-tarea").style.display =
+      "block";
+  });
 
-  <script src="profesor.js"></script>
 
-</body>
-</html>
+document
+  .getElementById("guardar-tarea")
+  .addEventListener("click", async () => {
+
+    const mensaje =
+      document.getElementById("mensaje-tarea");
+
+    const alumnoId =
+      document.getElementById("alumno_tarea").value;
+
+    const texto =
+      document.getElementById("texto_tarea").value.trim();
+
+    const descripcion =
+      document.getElementById("descripcion_tarea").value.trim();
+
+    const asignatura =
+      document.getElementById("asignatura_tarea").value.trim();
+
+    const fechaLimite =
+      document.getElementById("fecha_limite_tarea").value;
+
+    const estado =
+      document.getElementById("estado_tarea").value;
+
+    if (!alumnoId || !texto) {
+
+      mensaje.textContent =
+        "Selecciona un alumno y escribe el título de la tarea.";
+
+      return;
+    }
+
+    const tarea = {
+      texto: texto,
+      descripcion: descripcion,
+      asignatura: asignatura,
+      fecha_limite: fechaLimite || null,
+      estado: estado,
+      alumno_id: alumnoId
+    };
+
+    mensaje.textContent =
+      "Guardando tarea...";
+
+    let respuesta;
+
+    if (tareaEditando) {
+
+      respuesta = await fetch(
+        `${SUPABASE_URL}/rest/v1/tareas?id=eq.${tareaEditando}`,
+        {
+          method: "PATCH",
+          headers: {
+            ...headers,
+            "Prefer": "return=representation"
+          },
+          body: JSON.stringify(tarea)
+        }
+      );
+
+    } else {
+
+      respuesta = await fetch(
+        `${SUPABASE_URL}/rest/v1/tareas`,
+        {
+          method: "POST",
+          headers: {
+            ...headers,
+            "Prefer": "return=representation"
+          },
+          body: JSON.stringify(tarea)
+        }
+      );
+    }
+
+    if (!respuesta.ok) {
+
+      mensaje.textContent =
+        "No se ha podido guardar la tarea.";
+
+      return;
+    }
+
+    mensaje.textContent =
+      tareaEditando
+        ? "Tarea actualizada correctamente."
+        : "Tarea creada correctamente.";
+
+    limpiarFormularioTarea();
+
+    cargarTareas();
+  });
+
+
+document
+  .getElementById("cancelar-edicion-tarea")
+  .addEventListener("click", () => {
+
+    limpiarFormularioTarea();
+  });
+
+
+function limpiarFormularioTarea() {
+
+  tareaEditando = null;
+
+  document
+    .getElementById("titulo-formulario-tarea")
+    .textContent = "Nueva tarea";
+
+  document
+    .getElementById("guardar-tarea")
+    .textContent = "Guardar tarea";
+
+  document
+    .getElementById("cancelar-edicion-tarea")
+    .style.display = "none";
+
+  document.getElementById("alumno_tarea").value = "";
+  document.getElementById("texto_tarea").value = "";
+  document.getElementById("descripcion_tarea").value = "";
+  document.getElementById("asignatura_tarea").value = "";
+  document.getElementById("fecha_limite_tarea").value = "";
+
+  document.getElementById("estado_tarea").value =
+    "Pendiente";
+
+  document.getElementById("mensaje-tarea").textContent = "";
+}
+
+
+function editarTarea(tarea) {
+
+  tareaEditando = tarea.id;
+
+  document
+    .getElementById("titulo-formulario-tarea")
+    .textContent = "Editar tarea";
+
+  document
+    .getElementById("guardar-tarea")
+    .textContent = "Guardar cambios";
+
+  document
+    .getElementById("cancelar-edicion-tarea")
+    .style.display = "inline-block";
+
+  document
+    .getElementById("formulario-tarea")
+    .style.display = "block";
+
+  document.getElementById("alumno_tarea").value =
+    tarea.alumno_id || "";
+
+  document.getElementById("texto_tarea").value =
+    tarea.texto || "";
+
+  document.getElementById("descripcion_tarea").value =
+    tarea.descripcion || "";
+
+  document.getElementById("asignatura_tarea").value =
+    tarea.asignatura || "";
+
+  document.getElementById("fecha_limite_tarea").value =
+    tarea.fecha_limite || "";
+
+  document.getElementById("estado_tarea").value =
+    tarea.estado || "Pendiente";
+}
+
+
+async function eliminarTarea(id) {
+
+  if (!confirm("¿Seguro que quieres eliminar esta tarea?")) {
+    return;
+  }
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/tareas?id=eq.${id}`,
+    {
+      method: "DELETE",
+      headers: headers
+    }
+  );
+
+  if (!respuesta.ok) {
+
+    alert("No se ha podido eliminar la tarea.");
+
+    return;
+  }
+
+  cargarTareas();
+}
+
+
+async function cargarTareas() {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/tareas?select=id,texto,descripcion,asignatura,fecha_limite,estado,alumno_id,alumnos(nombre,apellidos,numero_alumno)&order=fecha_limite.asc`,
+    {
+      headers: headers
+    }
+  );
+
+  const tareas = await respuesta.json();
+
+  const contenedor =
+    document.getElementById("tareas");
+
+  if (!respuesta.ok || tareas.length === 0) {
+
+    contenedor.innerHTML =
+      "<p>No hay tareas.</p>";
+
+    return;
+  }
+
+  contenedor.innerHTML = "";
+
+  tareas.forEach(tarea => {
+
+    const elemento =
+      document.createElement("div");
+
+    const alumno =
+      tarea.alumnos;
+
+    let nombreAlumno = "Alumno no identificado";
+
+    if (alumno) {
+
+      nombreAlumno =
+        `${alumno.nombre} ${alumno.apellidos}`;
+
+    }
+
+    elemento.innerHTML = `
+      <h3>
+        ${tarea.texto}
+      </h3>
+
+      <p>
+        <strong>Alumno:</strong>
+        ${nombreAlumno}
+      </p>
+
+      ${
+        alumno
+          ? `<p>
+               <strong>Número:</strong>
+               ${alumno.numero_alumno || "-"}
+             </p>`
+          : ""
+      }
+
+      <p>
+        ${tarea.descripcion || ""}
+      </p>
+
+      <p>
+        <strong>Asignatura:</strong>
+        ${tarea.asignatura || "-"}
+      </p>
+
+      <p>
+        <strong>Fecha límite:</strong>
+        ${tarea.fecha_limite || "-"}
+      </p>
+
+      <p>
+        <strong>Estado:</strong>
+        ${tarea.estado || "-"}
+      </p>
+
+      <button class="editar-tarea">
+        ✏️ Editar
+      </button>
+
+      <button class="eliminar-tarea">
+        🗑️ Eliminar
+      </button>
+
+      <hr>
+    `;
+
+    elemento
+      .querySelector(".editar-tarea")
+      .addEventListener(
+        "click",
+        () => editarTarea(tarea)
+      );
+
+    elemento
+      .querySelector(".eliminar-tarea")
+      .addEventListener(
+        "click",
+        () => eliminarTarea(tarea.id)
+      );
+
+    contenedor.appendChild(elemento);
+  });
+}
+
+
+/* =========================
+   AVISOS
+========================= */
+
+async function cargarAvisos() {
+
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/avisos?select=titulo,mensaje,fecha,activo&order=fecha.desc`,
+    {
+      headers: headers
+    }
+  );
+
+  const avisos = await respuesta.json();
+
+  const contenedor =
+    document.getElementById("avisos");
+
+  if (!respuesta.ok || avisos.length === 0) {
+
+    contenedor.innerHTML =
+      "<p>No hay avisos.</p>";
+
+    return;
+  }
+
+  contenedor.innerHTML = "";
+
+  avisos.forEach(aviso => {
+
+    const elemento =
+      document.createElement("div");
+
+    elemento.innerHTML = `
+      <h3>${aviso.titulo}</h3>
+
+      <p>${aviso.mensaje}</p>
+
+      <p>
+        <strong>Fecha:</strong>
+        ${aviso.fecha || "-"}
+      </p>
+
+      <p>
+        <strong>Activo:</strong>
+        ${aviso.activo ? "Sí" : "No"}
+      </p>
+
+      <hr>
+    `;
+
+    contenedor.appendChild(elemento);
+  });
+}
+
+
+/* =========================
+   CARGA INICIAL
+========================= */
+
+cargarAlumnos();
+cargarTareas();
+cargarAvisos();
