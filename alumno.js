@@ -1,5 +1,5 @@
 const SUPABASE_URL = "https://lclxdcsgfqwfahwlnjkj.supabase.co";
-const SUPABASE_KEY = "TU_MISMA_PUBLISHABLE_KEY";
+const SUPABASE_KEY = "sb_publishable_fH8WjNl3CLJr3Id9eQnQdQ_0AnynpMc";
 
 const token = localStorage.getItem("access_token");
 const userId = localStorage.getItem("user_id");
