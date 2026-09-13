@@ -12,6 +12,7 @@
   <h1>Cole Gon</h1>
   <p>Portal del alumnado y profesorado</p>
 
+  <script src="app.js"></script>
 </body>
 </html>
 ```
