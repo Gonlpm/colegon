@@ -9,6 +9,11 @@ body {
   color: #172033;
 }
 
+
+/* =========================
+   CABECERA
+========================= */
+
 header {
   background: #14213d;
   color: white;
@@ -24,6 +29,11 @@ header p {
   margin: 0;
   color: #dbe2ef;
 }
+
+
+/* =========================
+   CONTENIDO
+========================= */
 
 main {
   max-width: 900px;
@@ -51,19 +61,45 @@ p {
   color: #5b6472;
 }
 
-button {
-  background: #14213d;
-  color: white;
-  border: none;
-  padding: 10px 16px;
-  border-radius: 8px;
-  cursor: pointer;
-  margin: 5px;
+
+/* =========================
+   PANTALLA DE INICIO
+========================= */
+
+.login-container {
+  max-width: 480px;
+  margin: 80px auto;
+  padding: 20px;
 }
 
-button:hover {
-  opacity: 0.9;
+.login-container section {
+  padding: 35px;
+  text-align: center;
 }
+
+.login-container h1 {
+  margin: 0;
+  color: #14213d;
+  font-size: 38px;
+}
+
+.login-container h2 {
+  color: #14213d;
+  margin-bottom: 20px;
+}
+
+.login-container p {
+  margin-top: 8px;
+}
+
+.login-container hr {
+  margin: 28px 0;
+}
+
+
+/* =========================
+   FORMULARIOS
+========================= */
 
 input,
 textarea,
@@ -74,6 +110,14 @@ select {
   border: 1px solid #ccd2da;
   border-radius: 8px;
   font-size: 15px;
+  font-family: Arial, sans-serif;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: #14213d;
 }
 
 textarea {
@@ -81,16 +125,68 @@ textarea {
   resize: vertical;
 }
 
+
+/* =========================
+   BOTONES
+========================= */
+
+button {
+  background: #14213d;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 5px;
+  font-size: 15px;
+}
+
+button:hover {
+  opacity: 0.9;
+}
+
+.login-container button {
+  width: 100%;
+  margin: 10px 0;
+  padding: 12px;
+  font-size: 16px;
+}
+
+
+/* =========================
+   MENSAJES
+========================= */
+
+#mensaje {
+  min-height: 20px;
+  margin-top: 15px;
+}
+
+
+/* =========================
+   SEPARADORES
+========================= */
+
 hr {
   border: none;
   border-top: 1px solid #e1e5ea;
   margin: 25px 0;
 }
 
+
+/* =========================
+   CERRAR SESIÓN
+========================= */
+
 #cerrar-sesion {
   float: right;
   background: #8b1e2d;
 }
+
+
+/* =========================
+   TAREAS Y AVISOS
+========================= */
 
 #tareas > div,
 #avisos > div {
@@ -100,4 +196,35 @@ hr {
 #tareas h3,
 #avisos h3 {
   color: #14213d;
+}
+
+
+/* =========================
+   MÓVILES
+========================= */
+
+@media (max-width: 600px) {
+
+  .login-container {
+    margin: 30px auto;
+    padding: 12px;
+  }
+
+  .login-container section {
+    padding: 25px 18px;
+  }
+
+  .login-container h1 {
+    font-size: 32px;
+  }
+
+  main {
+    margin: 15px auto;
+    padding: 12px;
+  }
+
+  section {
+    padding: 18px;
+  }
+
 }
