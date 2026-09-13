@@ -8,14 +8,16 @@ if (!token || !userId) {
   window.location.href = "index.html";
 }
 
+const headers = {
+  "apikey": SUPABASE_KEY,
+  "Authorization": `Bearer ${token}`
+};
+
 async function cargarAlumno() {
   const respuesta = await fetch(
     `${SUPABASE_URL}/rest/v1/alumnos?usuario_id=eq.${userId}&select=nombre,apellidos,numero_alumno,curso,grupo`,
     {
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${token}`
-      }
+      headers: headers
     }
   );
 
@@ -40,6 +42,75 @@ async function cargarAlumno() {
 
   document.getElementById("grupo-alumno").textContent =
     alumno.grupo;
+
+  cargarTareas();
+  cargarAvisos();
+}
+
+async function cargarTareas() {
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/tareas?alumno_id=eq.${userId}&select=texto,descripcion,asignatura,fecha_limite,estado&order=fecha_limite.asc`,
+    {
+      headers: headers
+    }
+  );
+
+  const tareas = await respuesta.json();
+  const contenedor = document.getElementById("tareas");
+
+  if (!respuesta.ok || tareas.length === 0) {
+    contenedor.innerHTML = "<p>No tienes tareas pendientes.</p>";
+    return;
+  }
+
+  contenedor.innerHTML = "";
+
+  tareas.forEach(tarea => {
+    const elemento = document.createElement("div");
+
+    elemento.innerHTML = `
+      <h3>${tarea.texto}</h3>
+      <p>${tarea.descripcion || ""}</p>
+      <p><strong>Asignatura:</strong> ${tarea.asignatura || "-"}</p>
+      <p><strong>Fecha límite:</strong> ${tarea.fecha_limite || "-"}</p>
+      <p><strong>Estado:</strong> ${tarea.estado || "-"}</p>
+      <hr>
+    `;
+
+    contenedor.appendChild(elemento);
+  });
+}
+
+async function cargarAvisos() {
+  const respuesta = await fetch(
+    `${SUPABASE_URL}/rest/v1/avisos?activo=eq.true&select=titulo,mensaje,fecha&order=fecha.desc`,
+    {
+      headers: headers
+    }
+  );
+
+  const avisos = await respuesta.json();
+  const contenedor = document.getElementById("avisos");
+
+  if (!respuesta.ok || avisos.length === 0) {
+    contenedor.innerHTML = "<p>No hay avisos.</p>";
+    return;
+  }
+
+  contenedor.innerHTML = "";
+
+  avisos.forEach(aviso => {
+    const elemento = document.createElement("div");
+
+    elemento.innerHTML = `
+      <h3>${aviso.titulo}</h3>
+      <p>${aviso.mensaje}</p>
+      <p><strong>Fecha:</strong> ${aviso.fecha || "-"}</p>
+      <hr>
+    `;
+
+    contenedor.appendChild(elemento);
+  });
 }
 
 cargarAlumno();
