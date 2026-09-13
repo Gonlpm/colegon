@@ -54,13 +54,15 @@ async function comprobarAlumno() {
    CERRAR SESIÓN
 ========================= */
 
-document.getElementById("cerrar-sesion").addEventListener("click", () => {
+document
+  .getElementById("cerrar-sesion")
+  .addEventListener("click", () => {
 
-  localStorage.removeItem("access_token");
-  localStorage.removeItem("user_id");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
 
-  window.location.href = "index.html";
-});
+    window.location.href = "index.html";
+  });
 
 
 /* =========================
@@ -138,7 +140,8 @@ async function cargarTareas() {
     const elemento =
       document.createElement("div");
 
-    elemento.className = "tarea-item";
+    elemento.className =
+      "tarea-item";
 
     elemento.innerHTML = `
       <h3>
@@ -163,9 +166,11 @@ async function cargarTareas() {
 
       <p>
         <strong>📌 Estado:</strong>
+
         <span class="estado-pendiente">
           ${tarea.estado || "Pendiente"}
         </span>
+
       </p>
     `;
 
@@ -220,8 +225,6 @@ async function cargarAvisos() {
         <strong>📅 Fecha:</strong>
         ${aviso.fecha || "-"}
       </p>
-
-      <hr>
     `;
 
     contenedor.appendChild(elemento);
@@ -235,7 +238,8 @@ async function cargarAvisos() {
 
 async function iniciarPortalAlumno() {
 
-  const esAlumno = await comprobarAlumno();
+  const esAlumno =
+    await comprobarAlumno();
 
   if (!esAlumno) {
     return;
