@@ -160,10 +160,11 @@ botonOlvido.addEventListener("click", async () => {
 
     if (error) {
 
-      console.error(error);
+      console.error("ERROR COMPLETO SUPABASE:", error);
 
       mensaje.textContent =
-        "No se ha podido enviar el correo de recuperación.";
+        "ERROR SUPABASE: " +
+        error.message;
 
       return;
     }
@@ -175,10 +176,11 @@ botonOlvido.addEventListener("click", async () => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error("ERROR COMPLETO:", error);
 
     mensaje.textContent =
-      "No se ha podido conectar con Cole Gon.";
+      "ERROR: " +
+      error.message;
   }
 
 });
