@@ -1,3 +1,4 @@
+```javascript
 const SUPABASE_URL =
   "https://lclxdcsgfqwfahwlnjkj.supabase.co";
 
@@ -5,7 +6,7 @@ const SUPABASE_KEY =
   "sb_publishable_fH8WjNl3CLJr3Id9eQnQdQ_0AnynpMc";
 
 
-const supabase = window.supabase.createClient(
+const clienteSupabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
@@ -43,7 +44,7 @@ loginForm.addEventListener("submit", async (event) => {
   try {
 
     const { data, error } =
-      await supabase.auth.signInWithPassword({
+      await clienteSupabase.auth.signInWithPassword({
         email,
         password
       });
@@ -63,7 +64,7 @@ loginForm.addEventListener("submit", async (event) => {
 
 
     const { data: perfiles, error: errorPerfil } =
-      await supabase
+      await clienteSupabase
         .from("perfiles")
         .select("rol")
         .eq("usuario_id", usuario.id)
@@ -76,7 +77,7 @@ loginForm.addEventListener("submit", async (event) => {
       perfiles.length === 0
     ) {
 
-      await supabase.auth.signOut();
+      await clienteSupabase.auth.signOut();
 
       mensaje.textContent =
         "No se ha encontrado tu perfil.";
@@ -107,7 +108,7 @@ loginForm.addEventListener("submit", async (event) => {
     }
 
 
-    await supabase.auth.signOut();
+    await clienteSupabase.auth.signOut();
 
 
     mensaje.textContent =
@@ -149,7 +150,7 @@ botonOlvido.addEventListener("click", async () => {
   try {
 
     const { error } =
-      await supabase.auth.resetPasswordForEmail(
+      await clienteSupabase.auth.resetPasswordForEmail(
         email,
         {
           redirectTo:
@@ -184,3 +185,4 @@ botonOlvido.addEventListener("click", async () => {
   }
 
 });
+```
