@@ -1,4 +1,3 @@
-```javascript
 const SUPABASE_URL =
   "https://lclxdcsgfqwfahwlnjkj.supabase.co";
 
@@ -185,4 +184,3 @@ botonOlvido.addEventListener("click", async () => {
   }
 
 });
-```
