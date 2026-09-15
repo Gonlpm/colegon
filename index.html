@@ -36,13 +36,39 @@
           required
         >
 
-        <input
-          type="password"
-          id="password"
-          placeholder="Contraseña"
-          autocomplete="current-password"
-          required
-        >
+        <div style="position: relative; width: 100%;">
+
+          <input
+            type="password"
+            id="password"
+            placeholder="Contraseña"
+            autocomplete="current-password"
+            required
+            style="width: 100%; padding-right: 45px; box-sizing: border-box;"
+          >
+
+          <button
+            type="button"
+            id="mostrar-password"
+            aria-label="Mostrar contraseña"
+            style="
+              position: absolute;
+              right: 8px;
+              top: 50%;
+              transform: translateY(-50%);
+              border: none;
+              background: transparent;
+              padding: 5px;
+              margin: 0;
+              cursor: pointer;
+              font-size: 18px;
+              width: auto;
+            "
+          >
+            👁️
+          </button>
+
+        </div>
 
         <button type="submit">
           Iniciar sesión
@@ -65,6 +91,38 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="app.js"></script>
+
+  <script>
+    const botonMostrarPassword =
+      document.getElementById("mostrar-password");
+
+    const campoPassword =
+      document.getElementById("password");
+
+    botonMostrarPassword.addEventListener("click", () => {
+
+      if (campoPassword.type === "password") {
+
+        campoPassword.type = "text";
+        botonMostrarPassword.textContent = "🙈";
+        botonMostrarPassword.setAttribute(
+          "aria-label",
+          "Ocultar contraseña"
+        );
+
+      } else {
+
+        campoPassword.type = "password";
+        botonMostrarPassword.textContent = "👁️";
+        botonMostrarPassword.setAttribute(
+          "aria-label",
+          "Mostrar contraseña"
+        );
+
+      }
+
+    });
+  </script>
 
 </body>
 
