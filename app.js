@@ -61,6 +61,38 @@ loginForm.addEventListener("submit", async (event) => {
     const usuario =
       data.user;
 
+    const sesion =
+      data.session;
+
+
+    /* =========================
+       GUARDAR SESIÓN
+    ========================= */
+
+    if (!usuario || !sesion) {
+
+      mensaje.textContent =
+        "No se ha podido iniciar la sesión.";
+
+      return;
+    }
+
+
+    localStorage.setItem(
+      "access_token",
+      sesion.access_token
+    );
+
+
+    localStorage.setItem(
+      "user_id",
+      usuario.id
+    );
+
+
+    /* =========================
+       COMPROBAR PERFIL
+    ========================= */
 
     const { data: perfiles, error: errorPerfil } =
       await clienteSupabase
@@ -76,6 +108,9 @@ loginForm.addEventListener("submit", async (event) => {
       perfiles.length === 0
     ) {
 
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_id");
+
       await clienteSupabase.auth.signOut();
 
       mensaje.textContent =
@@ -89,6 +124,10 @@ loginForm.addEventListener("submit", async (event) => {
       perfiles[0].rol;
 
 
+    /* =========================
+       PROFESOR
+    ========================= */
+
     if (rol === "profesor") {
 
       window.location.href =
@@ -97,6 +136,10 @@ loginForm.addEventListener("submit", async (event) => {
       return;
     }
 
+
+    /* =========================
+       ALUMNO
+    ========================= */
 
     if (rol === "alumno") {
 
@@ -107,6 +150,13 @@ loginForm.addEventListener("submit", async (event) => {
     }
 
 
+    /* =========================
+       ROL INCORRECTO
+    ========================= */
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
+
     await clienteSupabase.auth.signOut();
 
 
@@ -115,6 +165,14 @@ loginForm.addEventListener("submit", async (event) => {
 
 
   } catch (error) {
+
+    console.error(
+      "ERROR COMPLETO LOGIN:",
+      error
+    );
+
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user_id");
 
     mensaje.textContent =
       "No se ha podido conectar con Cole Gon.";
@@ -160,7 +218,10 @@ botonOlvido.addEventListener("click", async () => {
 
     if (error) {
 
-      console.error("ERROR COMPLETO SUPABASE:", error);
+      console.error(
+        "ERROR COMPLETO SUPABASE:",
+        error
+      );
 
       mensaje.textContent =
         "ERROR SUPABASE: " +
@@ -176,7 +237,10 @@ botonOlvido.addEventListener("click", async () => {
 
   } catch (error) {
 
-    console.error("ERROR COMPLETO:", error);
+    console.error(
+      "ERROR COMPLETO:",
+      error
+    );
 
     mensaje.textContent =
       "ERROR: " +
