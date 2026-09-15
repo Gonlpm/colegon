@@ -5,7 +5,7 @@ const SUPABASE_KEY =
   "sb_publishable_fH8WjNl3CLJr3Id9eQnQdQ_0AnynpMc";
 
 
-const supabase = window.supabase.createClient(
+const clienteSupabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
@@ -31,7 +31,7 @@ async function prepararRecuperacion() {
   try {
 
     const { data, error } =
-      await supabase.auth.getSession();
+      await clienteSupabase.auth.getSession();
 
 
     if (error || !data.session) {
@@ -43,13 +43,14 @@ async function prepararRecuperacion() {
     }
 
 
-    mensaje.textContent =
-      "";
+    mensaje.textContent = "";
 
     return true;
 
 
   } catch (error) {
+
+    console.error(error);
 
     mensaje.textContent =
       "No se ha podido comprobar el enlace.";
@@ -103,17 +104,18 @@ formulario.addEventListener("submit", async (event) => {
   try {
 
     const { error } =
-      await supabase.auth.updateUser({
+      await clienteSupabase.auth.updateUser({
         password: password
       });
 
 
     if (error) {
 
-      console.error(error);
+      console.error("ERROR AL CAMBIAR CONTRASEÑA:", error);
 
       mensaje.textContent =
-        "No se ha podido cambiar la contraseña.";
+        "No se ha podido cambiar la contraseña: " +
+        error.message;
 
       return;
     }
@@ -123,7 +125,7 @@ formulario.addEventListener("submit", async (event) => {
       "Contraseña cambiada correctamente. Volviendo al inicio...";
 
 
-    await supabase.auth.signOut();
+    await clienteSupabase.auth.signOut();
 
 
     setTimeout(() => {
@@ -136,7 +138,7 @@ formulario.addEventListener("submit", async (event) => {
 
   } catch (error) {
 
-    console.error(error);
+    console.error("ERROR COMPLETO:", error);
 
     mensaje.textContent =
       "No se ha podido conectar con Cole Gon.";
