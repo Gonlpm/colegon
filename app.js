@@ -248,3 +248,29 @@ botonOlvido.addEventListener("click", async () => {
   }
 
 });
+
+
+const botonMostrarContrasena = document.getElementById("mostrar-contrasena");
+const campoContrasena = document.getElementById("password");
+
+if (botonMostrarContrasena && campoContrasena) {
+  botonMostrarContrasena.addEventListener("click", () => {
+
+    if (campoContrasena.type === "password") {
+      campoContrasena.type = "text";
+      botonMostrarContrasena.textContent = "🙈";
+      botonMostrarContrasena.setAttribute(
+        "aria-label",
+        "Ocultar contraseña"
+      );
+    } else {
+      campoContrasena.type = "password";
+      botonMostrarContrasena.textContent = "👁️";
+      botonMostrarContrasena.setAttribute(
+        "aria-label",
+        "Mostrar contraseña"
+      );
+    }
+
+  });
+}
