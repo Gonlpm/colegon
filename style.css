@@ -280,3 +280,29 @@ hr {
   }
 
 }s
+
+
+.password-container {
+  position: relative;
+  width: 100%;
+}
+
+.password-container input {
+  width: 100%;
+  box-sizing: border-box;
+  padding-right: 45px;
+}
+
+#mostrar-contrasena {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  padding: 5px;
+  margin: 0;
+  cursor: pointer;
+  font-size: 18px;
+  width: auto;
+}
