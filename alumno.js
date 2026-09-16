@@ -20,33 +20,39 @@ const headers = {
 
 async function comprobarAlumno() {
 
-  const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/perfiles?usuario_id=eq.${userId}&select=rol`,
-    {
-      headers: {
-        "apikey": SUPABASE_KEY,
-        "Authorization": `Bearer ${token}`
+  try {
+
+    const respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/perfiles?usuario_id=eq.${userId}&select=rol`,
+      {
+        headers: headers
       }
+    );
+
+    const perfiles = await respuesta.json();
+
+    if (
+      !respuesta.ok ||
+      perfiles.length === 0 ||
+      perfiles[0].rol !== "alumno"
+    ) {
+
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("user_id");
+
+      window.location.href = "index.html";
+
+      return false;
     }
-  );
 
-  const perfiles = await respuesta.json();
+    return true;
 
-  if (
-    !respuesta.ok ||
-    perfiles.length === 0 ||
-    perfiles[0].rol !== "alumno"
-  ) {
+  } catch (error) {
 
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user_id");
-
-    window.location.href = "index.html";
+    console.error("Error comprobando el alumno:", error);
 
     return false;
   }
-
-  return true;
 }
 
 
@@ -71,39 +77,62 @@ document
 
 async function cargarAlumno() {
 
-  const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/alumnos?usuario_id=eq.${userId}&select=nombre,apellidos,numero_alumno,curso,grupo`,
-    {
-      headers: headers
+  try {
+
+    const respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/alumnos?usuario_id=eq.${userId}&select=nombre,apellidos,numero_alumno,curso,grupo`,
+      {
+        headers: headers
+      }
+    );
+
+    const alumnos = await respuesta.json();
+
+    console.log("Usuario conectado:", userId);
+    console.log("Respuesta alumnos:", alumnos);
+
+    if (!respuesta.ok) {
+
+      console.error("Error cargando alumno:", alumnos);
+
+      document.getElementById("nombre-alumno").textContent =
+        "No se han podido cargar tus datos.";
+
+      return;
     }
-  );
 
-  const alumnos = await respuesta.json();
+    if (alumnos.length === 0) {
 
-  if (!respuesta.ok || alumnos.length === 0) {
+      document.getElementById("nombre-alumno").textContent =
+        "No se han encontrado tus datos.";
+
+      return;
+    }
+
+    const alumno = alumnos[0];
 
     document.getElementById("nombre-alumno").textContent =
-      "No se han encontrado tus datos.";
+      `${alumno.nombre} ${alumno.apellidos}`;
 
-    return;
+    document.getElementById("numero-alumno").textContent =
+      alumno.numero_alumno || "-";
+
+    document.getElementById("curso-alumno").textContent =
+      alumno.curso || "-";
+
+    document.getElementById("grupo-alumno").textContent =
+      alumno.grupo || "-";
+
+    await cargarTareas();
+    await cargarAvisos();
+
+  } catch (error) {
+
+    console.error("Error cargando datos del alumno:", error);
+
+    document.getElementById("nombre-alumno").textContent =
+      "No se han podido cargar tus datos.";
   }
-
-  const alumno = alumnos[0];
-
-  document.getElementById("nombre-alumno").textContent =
-    `${alumno.nombre} ${alumno.apellidos}`;
-
-  document.getElementById("numero-alumno").textContent =
-    alumno.numero_alumno || "-";
-
-  document.getElementById("curso-alumno").textContent =
-    alumno.curso || "-";
-
-  document.getElementById("grupo-alumno").textContent =
-    alumno.grupo || "-";
-
-  cargarTareas();
-  cargarAvisos();
 }
 
 
@@ -113,69 +142,75 @@ async function cargarAlumno() {
 
 async function cargarTareas() {
 
-  const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/tareas?alumno_id=eq.${userId}&estado=eq.Pendiente&select=id,texto,descripcion,asignatura,fecha_limite,estado&order=fecha_limite.asc`,
-    {
-      headers: headers
-    }
-  );
+  try {
 
-  const tareas = await respuesta.json();
-
-  const contenedor =
-    document.getElementById("tareas");
-
-  if (!respuesta.ok || tareas.length === 0) {
-
-    contenedor.innerHTML =
-      "<p>🎉 No tienes tareas pendientes.</p>";
-
-    return;
-  }
-
-  contenedor.innerHTML = "";
-
-  tareas.forEach(tarea => {
-
-    const elemento =
-      document.createElement("div");
-
-    elemento.className =
-      "tarea-item";
-
-    elemento.innerHTML = `
-      <h3>
-        ${tarea.texto}
-      </h3>
-
-      ${
-        tarea.descripcion
-          ? `<p>${tarea.descripcion}</p>`
-          : ""
+    const respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/tareas?alumno_id=eq.${userId}&estado=eq.Pendiente&select=id,texto,descripcion,asignatura,fecha_limite,estado&order=fecha_limite.asc`,
+      {
+        headers: headers
       }
+    );
 
-      <p>
-        <strong>📖 Asignatura:</strong>
-        ${tarea.asignatura || "-"}
-      </p>
+    const tareas = await respuesta.json();
 
-      <p>
-        <strong>📅 Fecha límite:</strong>
-        ${tarea.fecha_limite || "-"}
-      </p>
+    const contenedor =
+      document.getElementById("tareas");
 
-      <p>
-        <strong>📌 Estado:</strong>
+    if (!respuesta.ok || tareas.length === 0) {
 
-        <span class="estado-pendiente">
-          ${tarea.estado || "Pendiente"}
-        </span>
+      contenedor.innerHTML =
+        "<p>🎉 No tienes tareas pendientes.</p>";
 
-      </p>
-    `;
+      return;
+    }
 
-    contenedor.appendChild(elemento);
-  });
+    contenedor.innerHTML = "";
+
+    tareas.forEach(tarea => {
+
+      const elemento =
+        document.createElement("div");
+
+      elemento.className =
+        "tarea-item";
+
+      elemento.innerHTML = `
+        <h3>${tarea.texto}</h3>
+
+        ${
+          tarea.descripcion
+            ? `<p>${tarea.descripcion}</p>`
+            : ""
+        }
+
+        <p>
+          <strong>📖 Asignatura:</strong>
+          ${tarea.asignatura || "-"}
+        </p>
+
+        <p>
+          <strong>📅 Fecha límite:</strong>
+          ${tarea.fecha_limite || "-"}
+        </p>
+
+        <p>
+          <strong>📌 Estado:</strong>
+          <span class="estado-pendiente">
+            ${tarea.estado || "Pendiente"}
+          </span>
+        </p>
+      `;
+
+      contenedor.appendChild(elemento);
+    });
+
+  } catch (error) {
+
+    console.error("Error cargando tareas:", error);
+
+    document.getElementById("tareas").innerHTML =
+      "<p>No se han podido cargar las tareas.</p>";
+  }
 }
 
 
@@ -185,50 +220,56 @@ async function cargarTareas() {
 
 async function cargarAvisos() {
 
-  const respuesta = await fetch(
-    `${SUPABASE_URL}/rest/v1/avisos?activo=eq.true&destinatario=in.(todos,alumnos)&select=titulo,mensaje,fecha,destinatario&order=fecha.desc`,
-    {
-      headers: headers
+  try {
+
+    const respuesta = await fetch(
+      `${SUPABASE_URL}/rest/v1/avisos?activo=eq.true&destinatario=in.(todos,alumnos)&select=titulo,mensaje,fecha,destinatario&order=fecha.desc`,
+      {
+        headers: headers
+      }
+    );
+
+    const avisos = await respuesta.json();
+
+    const contenedor =
+      document.getElementById("avisos");
+
+    if (!respuesta.ok || avisos.length === 0) {
+
+      contenedor.innerHTML =
+        "<p>No hay avisos.</p>";
+
+      return;
     }
-  );
 
-  const avisos = await respuesta.json();
+    contenedor.innerHTML = "";
 
-  const contenedor =
-    document.getElementById("avisos");
+    avisos.forEach(aviso => {
 
-  if (!respuesta.ok || avisos.length === 0) {
+      const elemento =
+        document.createElement("div");
 
-    contenedor.innerHTML =
-      "<p>No hay avisos.</p>";
+      elemento.innerHTML = `
+        <h3>${aviso.titulo}</h3>
 
-    return;
+        <p>${aviso.mensaje}</p>
+
+        <p>
+          <strong>📅 Fecha:</strong>
+          ${aviso.fecha || "-"}
+        </p>
+      `;
+
+      contenedor.appendChild(elemento);
+    });
+
+  } catch (error) {
+
+    console.error("Error cargando avisos:", error);
+
+    document.getElementById("avisos").innerHTML =
+      "<p>No se han podido cargar los avisos.</p>";
   }
-
-  contenedor.innerHTML = "";
-
-  avisos.forEach(aviso => {
-
-    const elemento =
-      document.createElement("div");
-
-    elemento.innerHTML = `
-      <h3>
-        ${aviso.titulo}
-      </h3>
-
-      <p>
-        ${aviso.mensaje}
-      </p>
-
-      <p>
-        <strong>📅 Fecha:</strong>
-        ${aviso.fecha || "-"}
-      </p>
-    `;
-
-    contenedor.appendChild(elemento);
-  });
 }
 
 
@@ -245,7 +286,7 @@ async function iniciarPortalAlumno() {
     return;
   }
 
-  cargarAlumno();
+  await cargarAlumno();
 }
 
 iniciarPortalAlumno();
