@@ -1,4 +1,3 @@
-```javascript
 const SUPABASE_URL =
   "https://lclxdcsgfqwfahwlnjkj.supabase.co";
 
@@ -6,292 +5,343 @@ const SUPABASE_KEY =
   "sb_publishable_fH8WjNl3CLJr3Id9eQnQdQ_0AnynpMc";
 
 
-const clienteSupabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+document.addEventListener("DOMContentLoaded", () => {
 
+  /* =========================
+     SUPABASE
+  ========================= */
 
-const loginForm =
-  document.getElementById("login-form");
+  const clienteSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-const mensaje =
-  document.getElementById("mensaje");
 
-const botonOlvido =
-  document.getElementById("olvido-contrasena");
+  /* =========================
+     ELEMENTOS
+  ========================= */
 
-const botonMostrarContrasena =
-  document.getElementById("mostrar-contrasena");
+  const loginForm =
+    document.getElementById("login-form");
 
-const campoContrasena =
-  document.getElementById("password");
+  const mensaje =
+    document.getElementById("mensaje");
 
+  const botonOlvido =
+    document.getElementById("olvido-contrasena");
 
-/* =========================
-   MOSTRAR / OCULTAR CONTRASEÑA
-========================= */
+  const botonMostrarContrasena =
+    document.getElementById("mostrar-contrasena");
 
-if (botonMostrarContrasena && campoContrasena) {
+  const campoContrasena =
+    document.getElementById("password");
 
-  botonMostrarContrasena.addEventListener("click", (event) => {
 
-    event.preventDefault();
-    event.stopPropagation();
+  /* =========================
+     MOSTRAR / OCULTAR CONTRASEÑA
+  ========================= */
 
-    if (campoContrasena.type === "password") {
+  if (botonMostrarContrasena && campoContrasena) {
 
-      campoContrasena.type = "text";
+    botonMostrarContrasena.addEventListener(
+      "click",
+      (event) => {
 
-      botonMostrarContrasena.textContent = "🙈";
+        event.preventDefault();
+        event.stopPropagation();
 
-      botonMostrarContrasena.setAttribute(
-        "aria-label",
-        "Ocultar contraseña"
-      );
+        if (campoContrasena.type === "password") {
 
-    } else {
+          campoContrasena.type = "text";
 
-      campoContrasena.type = "password";
+          botonMostrarContrasena.textContent = "🙈";
 
-      botonMostrarContrasena.textContent = "👁️";
+          botonMostrarContrasena.setAttribute(
+            "aria-label",
+            "Ocultar contraseña"
+          );
 
-      botonMostrarContrasena.setAttribute(
-        "aria-label",
-        "Mostrar contraseña"
-      );
-    }
+        } else {
 
-  });
+          campoContrasena.type = "password";
 
-}
+          botonMostrarContrasena.textContent = "👁️";
 
-
-/* =========================
-   INICIAR SESIÓN
-========================= */
-
-loginForm.addEventListener("submit", async (event) => {
-
-  event.preventDefault();
-
-  const email =
-    document.getElementById("email").value.trim();
-
-  const password =
-    document.getElementById("password").value;
-
-
-  mensaje.textContent =
-    "Iniciando sesión...";
-
-
-  try {
-
-    const { data, error } =
-      await clienteSupabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-
-    if (error) {
-
-      mensaje.textContent =
-        "Correo o contraseña incorrectos.";
-
-      return;
-    }
-
-
-    const usuario =
-      data.user;
-
-    const sesion =
-      data.session;
-
-
-    /* =========================
-       GUARDAR SESIÓN
-    ========================= */
-
-    if (!usuario || !sesion) {
-
-      mensaje.textContent =
-        "No se ha podido iniciar la sesión.";
-
-      return;
-    }
-
-
-    localStorage.setItem(
-      "access_token",
-      sesion.access_token
-    );
-
-
-    localStorage.setItem(
-      "user_id",
-      usuario.id
-    );
-
-
-    /* =========================
-       COMPROBAR PERFIL
-    ========================= */
-
-    const { data: perfiles, error: errorPerfil } =
-      await clienteSupabase
-        .from("perfiles")
-        .select("rol")
-        .eq("usuario_id", usuario.id)
-        .limit(1);
-
-
-    if (
-      errorPerfil ||
-      !perfiles ||
-      perfiles.length === 0
-    ) {
-
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("user_id");
-
-      await clienteSupabase.auth.signOut();
-
-      mensaje.textContent =
-        "No se ha encontrado tu perfil.";
-
-      return;
-    }
-
-
-    const rol =
-      perfiles[0].rol;
-
-
-    /* =========================
-       PROFESOR
-    ========================= */
-
-    if (rol === "profesor") {
-
-      window.location.href =
-        "profesor.html";
-
-      return;
-    }
-
-
-    /* =========================
-       ALUMNO
-    ========================= */
-
-    if (rol === "alumno") {
-
-      window.location.href =
-        "alumno.html";
-
-      return;
-    }
-
-
-    /* =========================
-       ROL INCORRECTO
-    ========================= */
-
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user_id");
-
-    await clienteSupabase.auth.signOut();
-
-
-    mensaje.textContent =
-      "Tu rol no está configurado correctamente.";
-
-
-  } catch (error) {
-
-    console.error(
-      "ERROR COMPLETO LOGIN:",
-      error
-    );
-
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("user_id");
-
-    mensaje.textContent =
-      "No se ha podido conectar con Cole Gon.";
-  }
-
-});
-
-
-/* =========================
-   RECUPERAR CONTRASEÑA
-========================= */
-
-botonOlvido.addEventListener("click", async () => {
-
-  const email =
-    document.getElementById("email").value.trim();
-
-
-  if (!email) {
-
-    mensaje.textContent =
-      "Escribe primero tu correo electrónico.";
-
-    return;
-  }
-
-
-  mensaje.textContent =
-    "Enviando correo de recuperación...";
-
-
-  try {
-
-    const { error } =
-      await clienteSupabase.auth.resetPasswordForEmail(
-        email,
-        {
-          redirectTo:
-            "https://gonlpm.github.io/colegon/recuperar.html"
+          botonMostrarContrasena.setAttribute(
+            "aria-label",
+            "Mostrar contraseña"
+          );
         }
-      );
 
-
-    if (error) {
-
-      console.error(
-        "ERROR COMPLETO SUPABASE:",
-        error
-      );
-
-      mensaje.textContent =
-        "ERROR SUPABASE: " +
-        error.message;
-
-      return;
-    }
-
-
-    mensaje.textContent =
-      "Si el correo está registrado, recibirás un enlace para cambiar la contraseña.";
-
-
-  } catch (error) {
-
-    console.error(
-      "ERROR COMPLETO:",
-      error
+      }
     );
 
-    mensaje.textContent =
-      "ERROR: " +
-      error.message;
+  }
+
+
+  /* =========================
+     INICIAR SESIÓN
+  ========================= */
+
+  if (loginForm) {
+
+    loginForm.addEventListener(
+      "submit",
+      async (event) => {
+
+        event.preventDefault();
+
+        const email =
+          document.getElementById("email").value.trim();
+
+        const password =
+          document.getElementById("password").value;
+
+
+        mensaje.textContent =
+          "Iniciando sesión...";
+
+
+        try {
+
+          const { data, error } =
+            await clienteSupabase.auth.signInWithPassword({
+              email,
+              password
+            });
+
+
+          if (error) {
+
+            console.error(
+              "ERROR LOGIN:",
+              error
+            );
+
+            mensaje.textContent =
+              "Correo o contraseña incorrectos.";
+
+            return;
+          }
+
+
+          const usuario =
+            data.user;
+
+          const sesion =
+            data.session;
+
+
+          /* =========================
+             GUARDAR SESIÓN
+          ========================= */
+
+          if (!usuario || !sesion) {
+
+            mensaje.textContent =
+              "No se ha podido iniciar la sesión.";
+
+            return;
+          }
+
+
+          localStorage.setItem(
+            "access_token",
+            sesion.access_token
+          );
+
+
+          localStorage.setItem(
+            "user_id",
+            usuario.id
+          );
+
+
+          /* =========================
+             COMPROBAR PERFIL
+          ========================= */
+
+          const {
+            data: perfiles,
+            error: errorPerfil
+          } =
+            await clienteSupabase
+              .from("perfiles")
+              .select("rol")
+              .eq("usuario_id", usuario.id)
+              .limit(1);
+
+
+          if (
+            errorPerfil ||
+            !perfiles ||
+            perfiles.length === 0
+          ) {
+
+            localStorage.removeItem(
+              "access_token"
+            );
+
+            localStorage.removeItem(
+              "user_id"
+            );
+
+            await clienteSupabase.auth.signOut();
+
+            mensaje.textContent =
+              "No se ha encontrado tu perfil.";
+
+            return;
+          }
+
+
+          const rol =
+            perfiles[0].rol;
+
+
+          /* =========================
+             PROFESOR
+          ========================= */
+
+          if (rol === "profesor") {
+
+            window.location.href =
+              "profesor.html";
+
+            return;
+          }
+
+
+          /* =========================
+             ALUMNO
+          ========================= */
+
+          if (rol === "alumno") {
+
+            window.location.href =
+              "alumno.html";
+
+            return;
+          }
+
+
+          /* =========================
+             ROL INCORRECTO
+          ========================= */
+
+          localStorage.removeItem(
+            "access_token"
+          );
+
+          localStorage.removeItem(
+            "user_id"
+          );
+
+          await clienteSupabase.auth.signOut();
+
+          mensaje.textContent =
+            "Tu rol no está configurado correctamente.";
+
+        } catch (error) {
+
+          console.error(
+            "ERROR COMPLETO LOGIN:",
+            error
+          );
+
+          localStorage.removeItem(
+            "access_token"
+          );
+
+          localStorage.removeItem(
+            "user_id"
+          );
+
+          mensaje.textContent =
+            "No se ha podido conectar con Cole Gon.";
+        }
+
+      }
+    );
+
+  }
+
+
+  /* =========================
+     RECUPERAR CONTRASEÑA
+  ========================= */
+
+  if (botonOlvido) {
+
+    botonOlvido.addEventListener(
+      "click",
+      async (event) => {
+
+        event.preventDefault();
+
+        const email =
+          document.getElementById("email").value.trim();
+
+
+        if (!email) {
+
+          mensaje.textContent =
+            "Escribe primero tu correo electrónico.";
+
+          return;
+        }
+
+
+        mensaje.textContent =
+          "Enviando correo de recuperación...";
+
+
+        try {
+
+          const { error } =
+            await clienteSupabase.auth
+              .resetPasswordForEmail(
+                email,
+                {
+                  redirectTo:
+                    "https://gonlpm.github.io/colegon/recuperar.html"
+                }
+              );
+
+
+          if (error) {
+
+            console.error(
+              "ERROR COMPLETO SUPABASE:",
+              error
+            );
+
+            mensaje.textContent =
+              "ERROR SUPABASE: " +
+              error.message;
+
+            return;
+          }
+
+
+          mensaje.textContent =
+            "Si el correo está registrado, recibirás un enlace para cambiar la contraseña.";
+
+        } catch (error) {
+
+          console.error(
+            "ERROR COMPLETO:",
+            error
+          );
+
+          mensaje.textContent =
+            "ERROR: " +
+            error.message;
+        }
+
+      }
+    );
+
   }
 
 });
-```
