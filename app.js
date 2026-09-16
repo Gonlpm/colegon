@@ -1,3 +1,4 @@
+```javascript
 const SUPABASE_URL =
   "https://lclxdcsgfqwfahwlnjkj.supabase.co";
 
@@ -19,6 +20,51 @@ const mensaje =
 
 const botonOlvido =
   document.getElementById("olvido-contrasena");
+
+const botonMostrarContrasena =
+  document.getElementById("mostrar-contrasena");
+
+const campoContrasena =
+  document.getElementById("password");
+
+
+/* =========================
+   MOSTRAR / OCULTAR CONTRASEÑA
+========================= */
+
+if (botonMostrarContrasena && campoContrasena) {
+
+  botonMostrarContrasena.addEventListener("click", (event) => {
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (campoContrasena.type === "password") {
+
+      campoContrasena.type = "text";
+
+      botonMostrarContrasena.textContent = "🙈";
+
+      botonMostrarContrasena.setAttribute(
+        "aria-label",
+        "Ocultar contraseña"
+      );
+
+    } else {
+
+      campoContrasena.type = "password";
+
+      botonMostrarContrasena.textContent = "👁️";
+
+      botonMostrarContrasena.setAttribute(
+        "aria-label",
+        "Mostrar contraseña"
+      );
+    }
+
+  });
+
+}
 
 
 /* =========================
@@ -248,29 +294,4 @@ botonOlvido.addEventListener("click", async () => {
   }
 
 });
-
-
-const botonMostrarContrasena = document.getElementById("mostrar-contrasena");
-const campoContrasena = document.getElementById("password");
-
-if (botonMostrarContrasena && campoContrasena) {
-  botonMostrarContrasena.addEventListener("click", () => {
-
-    if (campoContrasena.type === "password") {
-      campoContrasena.type = "text";
-      botonMostrarContrasena.textContent = "🙈";
-      botonMostrarContrasena.setAttribute(
-        "aria-label",
-        "Ocultar contraseña"
-      );
-    } else {
-      campoContrasena.type = "password";
-      botonMostrarContrasena.textContent = "👁️";
-      botonMostrarContrasena.setAttribute(
-        "aria-label",
-        "Mostrar contraseña"
-      );
-    }
-
-  });
-}
+```
